@@ -19,15 +19,16 @@ void GameLoop(void) {
 
     SDL_SetRenderDrawColor(kGraphics.renderer, 0x11, 0x11, 0x11, 0xFF);
     SDL_RenderClear(kGraphics.renderer);
+    SnakeRender(snake);
     SDL_RenderPresent(kGraphics.renderer);
   }
 }
 
 int main(void) {
-  if (GraphicsInit(&kGraphics) == 0) {
+  if (GraphicsInit() == 0) {
     GameLoop();
   }
 
-  GraphicsQuit(&kGraphics);
+  GraphicsQuit();
   return 0;
 }

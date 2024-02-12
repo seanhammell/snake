@@ -6,6 +6,8 @@ typedef void Snake;
 #endif  /* SNAKE_ */
 
 Snake *SnakeCreate(void);
-void SnakeDestroy(Snake *snake);
+void SnakeDestroy(Snake *self);
+
+void SnakeRender(Snake *self);
 
 #endif  /* SRC_SNAKE_H_ */
