@@ -1,13 +1,14 @@
 #ifndef SRC_SNAKE_H_
 #define SRC_SNAKE_H_
 
-#ifndef SNAKE_
-typedef void Snake;
-#endif  /* SNAKE_ */
+#include "src/constants.h"
 
-Snake *SnakeCreate(void);
-void SnakeDestroy(Snake *self);
+typedef struct {
+  int body[GRID_SIZE * GRID_SIZE];
+  int length;
+  Directions direction;
+} Snake;
 
-void SnakeRender(Snake *self);
+void snake_render(Snake *self);
 
 #endif  /* SRC_SNAKE_H_ */

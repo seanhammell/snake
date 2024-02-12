@@ -8,11 +8,9 @@ typedef struct {
   SDL_Renderer *renderer;
 } Graphics;
 
-int GraphicsInit(void);
-void GraphicsQuit(void);
+int graphics_init(void);
+void graphics_quit(void);
 
-void GraphicsDrawRect(SDL_Rect rect, SDL_Color color);
-
-extern Graphics kGraphics;
+extern Graphics graphics;
 
 #endif  /* SRC_GRAPHICS_H_ */
