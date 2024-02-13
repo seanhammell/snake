@@ -1,11 +1,13 @@
+#include "src/graphics.h"
+
 #include <stdio.h>
 
 #include "SDL2/SDL.h"
 
 #include "src/constants.h"
-#include "src/graphics.h"
 
-int graphics_init(void) {
+int graphics_init(void)
+{
   if (SDL_Init(SDL_INIT_VIDEO) != 0) {
     fprintf(stderr, "Error initializing SDL: %s\n", SDL_GetError());
     return 1;
@@ -26,7 +28,8 @@ int graphics_init(void) {
   return 0;
 }
 
-void graphics_quit(void) {
+void graphics_quit(void)
+{
   SDL_DestroyRenderer(graphics.renderer);
   SDL_DestroyWindow(graphics.window);
   SDL_Quit();
