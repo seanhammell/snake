@@ -1,16 +1,14 @@
-#ifndef SRC_GRAPHICS_H_
-#define SRC_GRAPHICS_H_
+#ifndef SNAKE_GRAPHICS_H
+#define SNAKE_GRAPHICS_H
 
 #include "SDL2/SDL.h"
 
-typedef struct {
-  SDL_Window *window;
-  SDL_Renderer *renderer;
-} Graphics;
+struct graphics {
+    SDL_Window *window;
+    SDL_Renderer *renderer;
+};
 
-int graphics_init(void);
-void graphics_quit(void);
+struct graphics *graphics_create(void);
+void graphics_destroy(struct graphics *graphics);
 
-extern Graphics graphics;
-
-#endif  /* SRC_GRAPHICS_H_ */
+#endif  /* SNAKE_GRAPHICS_H */

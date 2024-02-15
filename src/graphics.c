@@ -1,36 +1,44 @@
-#include "src/graphics.h"
-
+#include <assert.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "SDL2/SDL.h"
 
-#include "src/constants.h"
+#include "src/graphics.h"
 
-int graphics_init(void)
+#define SCREEN_SIZE 512
+
+struct graphics *graphics_create(void)
 {
-  if (SDL_Init(SDL_INIT_VIDEO) != 0) {
-    fprintf(stderr, "Error initializing SDL: %s\n", SDL_GetError());
-    return 1;
-  }
+    struct graphics *graphics = malloc(sizeof(struct graphics));
 
-  graphics.window = SDL_CreateWindow("Snake", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_SIZE, SCREEN_SIZE, SDL_WINDOW_SHOWN);
-  if (graphics.window == NULL) {
-    fprintf(stderr, "Error creating window: %s\n", SDL_GetError());
-    return 1;
-  }
+    if (SDL_Init(SDL_INIT_VIDEO) != 0) {
+        fprintf(stderr, "Error initializing SDL: %s\n", SDL_GetError());
+        graphics_destroy(graphics);
+        return NULL;
+    }
 
-  graphics.renderer = SDL_CreateRenderer(graphics.window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-  if (graphics.renderer == NULL) {
-    fprintf(stderr, "Error creating renderer: %s\n", SDL_GetError());
-    return 1;
-  }
+    graphics->window = SDL_CreateWindow("Snake", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_SIZE, SCREEN_SIZE, SDL_WINDOW_SHOWN);
+    if (graphics->window == NULL) {
+        fprintf(stderr, "Error creating window: %s\n", SDL_GetError());
+        graphics_destroy(graphics);
+        return NULL;
+    }
 
-  return 0;
+    graphics->renderer = SDL_CreateRenderer(graphics->window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    if (graphics->renderer == NULL) {
+        fprintf(stderr, "Error creating renderer: %s\n", SDL_GetError());
+        graphics_destroy(graphics);
+        return NULL;
+    }
+
+    return graphics;
 }
 
-void graphics_quit(void)
+void graphics_destroy(struct graphics *graphics)
 {
-  SDL_DestroyRenderer(graphics.renderer);
-  SDL_DestroyWindow(graphics.window);
-  SDL_Quit();
+    SDL_DestroyRenderer(graphics->renderer);
+    SDL_DestroyWindow(graphics->window);
+    SDL_Quit();
+    free(graphics);
 }
