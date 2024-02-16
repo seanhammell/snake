@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <stdlib.h>
 
 #include "SDL2/SDL.h"
 
@@ -36,20 +37,25 @@ struct apple {
     int y;
 };
 
-static void init_snake(struct snake *snake)
+static void reset_snake(struct snake *snake, int (*occupancy)[GRID_SIZE])
 {
-    snake->body[0].x = GRID_SIZE / 2;
-    snake->body[0].y = GRID_SIZE / 2;
+    snake->body[0].x = (GRID_SIZE / 2) - 1;
+    snake->body[0].y = (GRID_SIZE / 2) - 1;
     snake->body[0].dx = 0;
     snake->body[0].dy = 0;
     snake->length = 1;
     snake->direction = STOP;
+
+    memset(occupancy, 0, GRID_SIZE * GRID_SIZE);
+    occupancy[snake->body[0].x][snake->body[0].y] = 1;
 }
 
-static void random_apple(struct apple *apple)
+static void random_apple(struct apple *apple, int (*occupancy)[GRID_SIZE])
 {
-    apple->x = 15;
-    apple->y = 15;
+    do {
+        apple->x = rand() % GRID_SIZE;
+        apple->y = rand() % GRID_SIZE;
+    } while (occupancy[apple->x][apple->y]);
 }
 
 static void input(SDL_Event *e, struct snake *snake)
@@ -78,7 +84,7 @@ static void input(SDL_Event *e, struct snake *snake)
     }
 }
 
-static void update(uint64_t dt, struct snake *snake, struct apple *apple)
+static void update(uint64_t dt, struct snake *snake, struct apple *apple, int (*occupancy)[GRID_SIZE])
 {
     static const uint64_t interval = 80;
     static uint64_t elapsed = 0;
@@ -87,31 +93,42 @@ static void update(uint64_t dt, struct snake *snake, struct apple *apple)
     while (elapsed > interval) {
         elapsed -= interval;
         snake->offset = 0;
+
+        occupancy[snake->body[snake->length - 1].x][snake->body[snake->length - 1].y] = 0;
         for (int i = snake->length - 1; i > 0; --i)
             snake->body[i] = snake->body[i - 1];
 
-        snake->body[0].x += snake->body[0].dx;
-        snake->body[0].y += snake->body[0].dy;
+        struct segment *head = &snake->body[0];
+        head->x += head->dx;
+        head->y += head->dy;
+        if (head->x < 0 || head->y < 0 || head->x >= GRID_SIZE || head->y >= GRID_SIZE) {
+            reset_snake(snake, occupancy);
+            random_apple(apple, occupancy);
+            return;
+        }
+
+        occupancy[head->x][head->y] = 1;
         switch (snake->direction) {
         case UP:
-            snake->body[0].dx = 0;
-            snake->body[0].dy = -1;
+            head->dx = 0;
+            head->dy = -1;
             break;
         case DOWN:
-            snake->body[0].dx = 0;
-            snake->body[0].dy = 1;
+            head->dx = 0;
+            head->dy = 1;
             break;
         case LEFT:
-            snake->body[0].dx = -1;
-            snake->body[0].dy = 0;
+            head->dx = -1;
+            head->dy = 0;
             break;
         case RIGHT:
-            snake->body[0].dx = 1;
-            snake->body[0].dy = 0;
+            head->dx = 1;
+            head->dy = 0;
             break;
         }
 
-        if (snake->body[0].x + snake->body[0].dx == apple->x && snake->body[0].y + snake->body[0].dy == apple->y) {
+        if (head->x == apple->x && head->y == apple->y) {
+            random_apple(apple, occupancy);
             ++snake->length;
             if (snake->length == GRID_SIZE * GRID_SIZE)
                 return;
@@ -127,8 +144,9 @@ static void render(struct graphics *graphics, struct snake *snake, struct apple 
     SDL_Rect apple_rect = {0, 0, ENTITY_SIZE, ENTITY_SIZE};
     apple_rect.x = apple->x * TILE_SIZE;
     apple_rect.y = apple->y * TILE_SIZE;
-    SDL_SetRenderDrawColor(graphics->renderer, 0xFF, 0x00, 0x00, 0xFF);
+    SDL_SetRenderDrawColor(graphics->renderer, 0xAC, 0x38, 0x38, 0xFF);
     SDL_RenderFillRect(graphics->renderer, &apple_rect);
+    apple_rect.x += snake->body[0].dx;
 
     SDL_Rect segment = {0, 0, ENTITY_SIZE, ENTITY_SIZE};
     for (int i = 0; i < snake->length; ++i) {
@@ -145,11 +163,13 @@ void game_loop(void)
     if (graphics == NULL)
         return;
 
+    int occupancy[GRID_SIZE][GRID_SIZE] = {0};
+
     struct snake snake;
-    init_snake(&snake);
+    reset_snake(&snake, occupancy);
 
     struct apple apple;
-    random_apple(&apple);
+    random_apple(&apple, occupancy);
 
     SDL_Event e;
     uint64_t timer = 0;
@@ -164,7 +184,7 @@ void game_loop(void)
         }
 
         uint64_t now = SDL_GetTicks64();
-        update(now - timer, &snake, &apple);
+        update(now - timer, &snake, &apple, occupancy);
         timer = now;
 
         SDL_SetRenderDrawColor(graphics->renderer, 0x11, 0x11, 0x11, 0xFF);
