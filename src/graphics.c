@@ -8,6 +8,9 @@
 
 #define SCREEN_SIZE 512
 
+/**
+ * Initializes SDL and creates the window and renderer.
+ */
 struct graphics *graphics_create(void)
 {
     struct graphics *graphics = malloc(sizeof(struct graphics));
@@ -35,6 +38,9 @@ struct graphics *graphics_create(void)
     return graphics;
 }
 
+/**
+ * Frees graphics resources.
+ */
 void graphics_destroy(struct graphics *graphics)
 {
     SDL_DestroyRenderer(graphics->renderer);
