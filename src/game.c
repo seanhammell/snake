@@ -12,6 +12,9 @@
 
 #define OUT_OF_BOUNDS(s)    (s->x < 0 || s->y < 0 || s->x >= GRID_SIZE || s->y >= GRID_SIZE)
 
+/**
+ * Returns if the snake runs into its own tail.
+ */
 static int eat_tail(struct snake *snake) {
     for (int i = 1; i < snake->length; ++i)
         if (snake->body[0].x == snake->body[i].x && snake->body[0].y == snake->body[i].y)
@@ -132,7 +135,7 @@ static void update(uint64_t dt, struct snake *snake, struct vec2 *apple)
             ++snake->length;
         }
 
-        search_driver(snake, apple);
+        search_a_star(snake, apple);
         if (snake->links == 0) {
             fprintf(stderr, "No path found\n");
             snake->direction = N_DIRECTIONS;

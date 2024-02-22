@@ -3,6 +3,6 @@
 
 #include "src/game.h"
 
-void search_driver(struct snake *snake, struct vec2 *apple);
+void search_a_star(struct snake *snake, struct vec2 *apple);
 
 #endif  /* SNAKE_SEARCH_H */
