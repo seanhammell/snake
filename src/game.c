@@ -5,31 +5,19 @@
 
 #include "src/game.h"
 #include "src/graphics.h"
+#include "src/search.h"
 
 #define ENTITY_SIZE 14
 #define TILE_SIZE   16
-#define GRID_SIZE   32
 
 #define OUT_OF_BOUNDS(s)    (s->x < 0 || s->y < 0 || s->x >= GRID_SIZE || s->y >= GRID_SIZE)
 
-enum directions {
-    NONE,
-    UP,
-    DOWN,
-    LEFT,
-    RIGHT,
-};
-
-struct vec2 {
-    int x;
-    int y;
-};
-
-struct snake {
-    struct vec2 body[GRID_SIZE * GRID_SIZE];
-    int length;
-    int direction;
-};
+static int eat_tail(struct snake *snake) {
+    for (int i = 1; i < snake->length; ++i)
+        if (snake->body[0].x == snake->body[i].x && snake->body[0].y == snake->body[i].y)
+            return 1;
+    return 0;
+}
 
 /**
  * Resets the snake to a single stationary segment at the center of the screen.
@@ -39,7 +27,7 @@ static void reset_snake(struct snake *snake)
     snake->body[0].x = (GRID_SIZE / 2) - 1;
     snake->body[0].y = (GRID_SIZE / 2) - 1;
     snake->length = 1;
-    snake->direction = NONE;
+    snake->direction = UP;
 }
 
 /**
@@ -97,18 +85,17 @@ static void input(SDL_Event *e, struct snake *snake)
  */
 static void update(uint64_t dt, struct snake *snake, struct vec2 *apple)
 {
-    static const uint64_t interval = 80;
+    static const uint64_t interval = 10;
     static uint64_t elapsed = 0;
     elapsed += dt;
     while (elapsed > interval) {
         elapsed -= interval;
+        if (snake->direction == N_DIRECTIONS)
+            break;
 
         /* Shift the snake segments to their predecessor's position. */
-        int occupancy[GRID_SIZE][GRID_SIZE] = {0};
-        for (int i = snake->length - 1; i > 0; --i) {
+        for (int i = snake->length - 1; i > 0; --i)
             snake->body[i] = snake->body[i - 1];
-            occupancy[snake->body[i].x][snake->body[i].y] = 1;
-        }
 
         /* Move the snake. */
         struct vec2 *head = &snake->body[0];
@@ -128,14 +115,13 @@ static void update(uint64_t dt, struct snake *snake, struct vec2 *apple)
         }
 
         /* Reset the snake if it goes out of bounds or hit its tail. */
-        if (OUT_OF_BOUNDS(head) || occupancy[head->x][head->y] == 1) {
-            reset_snake(snake);
-            random_apple(apple, snake);
+        if (OUT_OF_BOUNDS(head) || eat_tail(snake)) {
+            /* reset_snake(snake); */
+            /* random_apple(apple, snake); */
             return;
         }
 
         /* Grow the snake if it eats an apple. */
-        occupancy[head->x][head->y] = 1;
         if (head->x == apple->x && head->y == apple->y) {
             random_apple(apple, snake);
             if (snake->length + 1 == GRID_SIZE * GRID_SIZE)
@@ -145,6 +131,22 @@ static void update(uint64_t dt, struct snake *snake, struct vec2 *apple)
             snake->body[snake->length].y = snake->body[snake->length - 1].y;
             ++snake->length;
         }
+
+        search_driver(snake, apple);
+        if (snake->links == 0) {
+            fprintf(stderr, "No path found\n");
+            snake->direction = N_DIRECTIONS;
+            continue;
+        }
+
+        if (snake->chain[snake->links - 1].y - snake->body[0].y == -1)
+            snake->direction = UP;
+        else if (snake->chain[snake->links - 1].y - snake->body[0].y == 1)
+            snake->direction = DOWN;
+        else if (snake->chain[snake->links - 1].x - snake->body[0].x == -1)
+            snake->direction = LEFT;
+        else if (snake->chain[snake->links - 1].x - snake->body[0].x == 1)
+            snake->direction = RIGHT;
     }
 }
 
@@ -153,6 +155,15 @@ static void update(uint64_t dt, struct snake *snake, struct vec2 *apple)
  */
 static void render(struct graphics *graphics, struct snake *snake, struct vec2 *apple)
 {
+    /* Draw the path. */
+    SDL_Rect segment = {0, 0, ENTITY_SIZE, ENTITY_SIZE};
+    for (int i = 0; i < snake->links; ++i) {
+        segment.x = snake->chain[i].x * TILE_SIZE;
+        segment.y = snake->chain[i].y * TILE_SIZE;
+        SDL_SetRenderDrawColor(graphics->renderer, 0x22, 0x22, 0x22, 0xFF);
+        SDL_RenderFillRect(graphics->renderer, &segment);
+    }
+
     /* Draw the apple. */
     SDL_Rect apple_rect = {0, 0, ENTITY_SIZE, ENTITY_SIZE};
     apple_rect.x = apple->x * TILE_SIZE;
@@ -161,7 +172,6 @@ static void render(struct graphics *graphics, struct snake *snake, struct vec2 *
     SDL_RenderFillRect(graphics->renderer, &apple_rect);
 
     /* Draw the snake. */
-    SDL_Rect segment = {0, 0, ENTITY_SIZE, ENTITY_SIZE};
     for (int i = 0; i < snake->length; ++i) {
         segment.x = snake->body[i].x * TILE_SIZE;
         segment.y = snake->body[i].y * TILE_SIZE;
