@@ -6,6 +6,7 @@
 #include "SDL2/SDL.h"
 
 #include "src/graphics.h"
+#include "src/search.h"
 #include "src/snake.h"
 
 #define ENTITY_SIZE 14
@@ -55,7 +56,7 @@ static void input(SDL_Event *e, struct snake *snake)
 
 static void update(uint64_t dt, struct snake *snake, struct vec2 *apple)
 {
-    static const uint64_t interval = 80;
+    static const uint64_t interval = 1;
     static uint64_t elapsed = 0;
     elapsed += dt;
     while (elapsed > interval) {
@@ -63,6 +64,15 @@ static void update(uint64_t dt, struct snake *snake, struct vec2 *apple)
         if (snake->direction == N_DIRECTIONS)
             break;
 
+        if (snake->length == GRID_SIZE * GRID_SIZE - 1) {
+            search_hamiltonian_cycle(snake);
+            snake_move(snake);
+            random_apple(snake, apple);
+            snake->direction = N_DIRECTIONS;
+            continue;
+        }
+
+        search_hamiltonian_cycle(snake);
         snake_move(snake);
 
         if (snake_biting_tail(snake))

@@ -7,8 +7,8 @@
 struct snake *snake_create(void)
 {
     struct snake *self = malloc(sizeof(struct snake));
-    self->body[0].x = (GRID_SIZE / 2) - 1;
-    self->body[0].y = (GRID_SIZE / 2) - 1;
+    self->body[0].x = GRID_SIZE / 2 - 1;
+    self->body[0].y = GRID_SIZE / 2 - 1;
     self->length = 1;
     self->direction = N_DIRECTIONS;
     return self;
