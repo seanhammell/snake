@@ -11,7 +11,7 @@
 #define ENTITY_SIZE 14
 #define TILE_SIZE   16
 
-void random_apple(struct vec2 *apple, struct snake *snake)
+void random_apple(struct snake *snake, struct vec2 *apple)
 {
     int occupied;
     do {
@@ -60,11 +60,17 @@ static void update(uint64_t dt, struct snake *snake, struct vec2 *apple)
     elapsed += dt;
     while (elapsed > interval) {
         elapsed -= interval;
+        if (snake->direction == N_DIRECTIONS)
+            break;
+
         snake_move(snake);
+
+        if (snake_biting_tail(snake))
+            snake->direction = N_DIRECTIONS;
 
         if (EATING_APPLE(snake, apple)) {
             snake_grow(snake);
-            random_apple(apple, snake);
+            random_apple(snake, apple);
         }
     }
 }
@@ -93,7 +99,7 @@ void game_loop(void)
 
     struct snake *snake = snake_create();
     struct vec2 apple;
-    random_apple(&apple, snake);
+    random_apple(snake, &apple);
 
     SDL_Event e;
     uint64_t timer = 0;

@@ -40,6 +40,16 @@ void snake_move(struct snake *self)
     }
 }
 
+int snake_biting_tail(struct snake *self)
+{
+    for (int i = 1; i < self->length; ++i) {
+        if (self->body[0].x == self->body[i].x && self->body[0].y == self->body[i].y)
+            return 1;
+    }
+
+    return 0;
+}
+
 void snake_grow(struct snake *self)
 {
     if (self->length + 1 == GRID_SIZE * GRID_SIZE)
