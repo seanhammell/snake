@@ -9,23 +9,16 @@
 #include "src/search.h"
 #include "src/snake.h"
 
-#define ENTITY_SIZE 14
-#define TILE_SIZE   16
-
 void random_apple(struct snake *snake, struct vec2 *apple)
 {
-    int occupied;
+    int occupied[GRID_SIZE][GRID_SIZE] = {0};
+    for (int i = 0; i < snake->length; ++i)
+        occupied[snake->body[i].x][snake->body[i].y] = 1;
+
     do {
         apple->x = rand() % GRID_SIZE;
         apple->y = rand() % GRID_SIZE;
-        occupied = 0;
-        for (int i = 0; i < snake->length; ++i) {
-            if (apple->x == snake->body[i].x && apple->y == snake->body[i].y) {
-                occupied = 1;
-                break;
-            }
-        }
-    } while (occupied);
+    } while (occupied[apple->x][apple->y]);
 }
 
 static void input(SDL_Event *e, struct snake *snake)
@@ -56,27 +49,24 @@ static void input(SDL_Event *e, struct snake *snake)
 
 static void update(uint64_t dt, struct snake *snake, struct vec2 *apple)
 {
-    static const uint64_t interval = 1;
+    static const uint64_t interval = 10;
     static uint64_t elapsed = 0;
+
+    if (snake->direction == N_DIRECTIONS)
+        return;
+
     elapsed += dt;
     while (elapsed > interval) {
         elapsed -= interval;
-        if (snake->direction == N_DIRECTIONS)
-            break;
-
-        if (snake->length == GRID_SIZE * GRID_SIZE - 1) {
-            search_hamiltonian_cycle(snake);
-            snake_move(snake);
-            random_apple(snake, apple);
-            snake->direction = N_DIRECTIONS;
-            continue;
-        }
-
         search_hamiltonian_cycle(snake);
         snake_move(snake);
 
-        if (snake_biting_tail(snake))
+        if (snake_biting_tail(snake) || FULL_SNAKE(snake)) {
             snake->direction = N_DIRECTIONS;
+            if (FULL_SNAKE(snake))
+                random_apple(snake, apple);
+            return;
+        }
 
         if (EATING_APPLE(snake, apple)) {
             snake_grow(snake);
@@ -87,7 +77,7 @@ static void update(uint64_t dt, struct snake *snake, struct vec2 *apple)
 
 static void render(struct graphics *graphics, struct snake *snake, struct vec2 *apple)
 {
-    SDL_Rect rect = {0, 0, ENTITY_SIZE, ENTITY_SIZE};
+    SDL_Rect rect = {0, 0, 14, 14};
     rect.x = apple->x * TILE_SIZE;
     rect.y = apple->y * TILE_SIZE;
     SDL_SetRenderDrawColor(graphics->renderer, 0xAC, 0x38, 0x38, 0xFF);

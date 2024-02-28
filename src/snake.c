@@ -2,7 +2,8 @@
 
 #include <stdint.h>
 #include <stdlib.h>
-#include <string.h>
+
+#include "src/search.h"
 
 struct snake *snake_create(void)
 {
@@ -10,7 +11,7 @@ struct snake *snake_create(void)
     self->body[0].x = GRID_SIZE / 2 - 1;
     self->body[0].y = GRID_SIZE / 2 - 1;
     self->length = 1;
-    self->direction = N_DIRECTIONS;
+    search_hamiltonian_cycle(self);
     return self;
 }
 
