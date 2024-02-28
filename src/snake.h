@@ -12,6 +12,7 @@ enum directions {
     LEFT,
     RIGHT,
     N_DIRECTIONS,
+    STOP,
 };
 
 struct vec2 {
