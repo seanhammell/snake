@@ -27,6 +27,7 @@ struct snake {
 };
 
 struct snake *snake_create(void);
+struct snake *snake_copy(struct snake *self);
 void snake_destroy(struct snake *self);
 
 void snake_move(struct snake *self);

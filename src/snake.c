@@ -15,6 +15,16 @@ struct snake *snake_create(void)
     return self;
 }
 
+struct snake *snake_copy(struct snake *self)
+{
+    struct snake *copy = malloc(sizeof(struct snake));
+    for (int i = 0; i < self->length; ++i)
+        copy->body[i] = self->body[i];
+    copy->length = self->length;
+    copy->direction = self->direction;
+    return copy;
+}
+
 void snake_destroy(struct snake *self)
 {
     free(self);
@@ -26,18 +36,18 @@ void snake_move(struct snake *self)
         self->body[i] = self->body[i - 1];
 
     switch (self->direction) {
-        case UP:
-            --self->body[0].y;
-            break;
-        case DOWN:
-            ++self->body[0].y;
-            break;
-        case LEFT:
-            --self->body[0].x;
-            break;
-        case RIGHT:
-            ++self->body[0].x;
-            break;
+    case UP:
+        --self->body[0].y;
+        break;
+    case DOWN:
+        ++self->body[0].y;
+        break;
+    case LEFT:
+        --self->body[0].x;
+        break;
+    case RIGHT:
+        ++self->body[0].x;
+        break;
     }
 }
 
