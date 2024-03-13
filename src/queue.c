@@ -1,67 +1,77 @@
 #include "src/queue.h"
 
-#include <stdio.h>
 #include <stdlib.h>
 
-#define MANHATTAN(a, b) (abs(a->x - b->x) + abs(a->y - b->y))
+#include "src/constants.h"
 
-struct priority_queue *queue_create(void)
+/**
+ * Resets the priority queue.
+ */
+void queue_reset(struct priority_queue *queue)
 {
-    struct priority_queue *queue = malloc(sizeof(struct priority_queue));
-    for (int i = 0; i < MAX_QUEUE_SIZE; ++i) {
-        queue->queue[i] = malloc(sizeof(struct node));
-        queue->queue[i]->position.x = 0;
-        queue->queue[i]->position.y = 0;
-        queue->queue[i]->reachable = 0;
-        queue->queue[i]->heuristic = 0;
-    }
-
+    for (int i = 0; i < N_VERTICES; ++i)
+        queue->queue[i] = NULL;
     queue->head = 0;
     queue->tail = 0;
-    return queue;
 }
 
-void queue_destroy(struct priority_queue *queue)
+/**
+ * Adds a vertex to the priority queue. All elements have the same value when
+ * enqueued, so sorting is handled by queue_decrease_key when graph_mst_prim
+ * updates an element.
+ */
+void queue_enqueue(struct priority_queue *queue, struct vertex *vertex)
 {
-    for (int i = 0; i < MAX_QUEUE_SIZE; ++i)
-        free(queue->queue[i]);
-    free(queue);
-}
-
-void queue_enqueue(struct priority_queue *queue, struct node_args *args)
-{
-    if (queue->tail == MAX_QUEUE_SIZE) {
-        fprintf(stderr, "Queue full\n");
-        return;
-    }
-
-    struct node *new = queue->queue[queue->tail];
-    new->position.x = args->position.x;
-    new->position.y = args->position.y;
-    new->reachable = args->reachable;
-    new->heuristic = new->reachable + MANHATTAN((&new->position), args->goal);
-
-    int i;
-    for (i = queue->head; i < queue->tail; ++i) {
-        if (new->heuristic < queue->queue[i]->heuristic)
-            break;
-    }
-
-    for (int j = queue->tail; j > i; --j)
-        queue->queue[j] = queue->queue[j - 1];
-
-    queue->queue[i] = new;
+    queue->queue[queue->tail] = vertex;
     ++queue->tail;
 }
 
-struct node *queue_dequeue(struct priority_queue *queue)
+/**
+ * Removes a vertex from the priority queue.
+ */
+struct vertex *queue_dequeue(struct priority_queue *queue)
 {
-    if (queue->head == queue->tail) {
-        fprintf(stderr, "Queue empty\n");
-        return NULL;
+    struct vertex *u = queue->queue[queue->head];
+    ++queue->head;
+    return u;
+}
+
+/**
+ * Returns if the priority queue contains the specified element.
+ */
+int queue_contains(struct priority_queue *queue, int u)
+{
+    for (int i = queue->head; i < queue->tail; ++i) {
+        if (queue->queue[i]->u == u)
+            return 1;
     }
 
-    struct node *head = queue->queue[queue->head];
-    ++queue->head;
-    return head;
+    return 0;
+}
+
+/**
+ * Updates the priority queue after an element's key is decreased.
+ */
+void queue_decrease_key(struct priority_queue *queue, struct vertex *vertex)
+{
+    int position;
+    for (position = queue->head; position < queue->tail; ++position) {
+        if (queue->queue[position]->u == vertex->u) {
+            queue->queue[position] = NULL;
+            break;
+        }
+    }
+
+    for (int i = position; i < queue->tail - 1; ++i)
+        queue->queue[i] = queue->queue[i + 1];
+    queue->queue[queue->tail - 1] = NULL;
+
+    for (position = queue->head; position < queue->tail; ++position) {
+        if (queue->queue[position] && vertex->key < queue->queue[position]->key)
+            break;
+    }
+
+    for (int j = queue->tail - 1; j > position; --j)
+        queue->queue[j] = queue->queue[j - 1];
+    queue->queue[position] = vertex;
 }

@@ -3,8 +3,12 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#include "src/constants.h"
 #include "src/search.h"
 
+/**
+ * Creates a new snake.
+ */
 struct snake *snake_create(void)
 {
     struct snake *self = malloc(sizeof(struct snake));
@@ -15,6 +19,9 @@ struct snake *snake_create(void)
     return self;
 }
 
+/**
+ * Makes a copy of the snake.
+ */
 struct snake *snake_copy(struct snake *self)
 {
     struct snake *copy = malloc(sizeof(struct snake));
@@ -25,11 +32,17 @@ struct snake *snake_copy(struct snake *self)
     return copy;
 }
 
+/**
+ * Destorys the snake.
+ */
 void snake_destroy(struct snake *self)
 {
     free(self);
 }
 
+/**
+ * Moves the snake one step in the direction it is facing.
+ */
 void snake_move(struct snake *self)
 {
     for (int i = self->length - 1; i > 0; --i)
@@ -51,6 +64,9 @@ void snake_move(struct snake *self)
     }
 }
 
+/**
+ * Returns whether the snake is biting its tail.
+ */
 int snake_biting_tail(struct snake *self)
 {
     for (int i = 1; i < self->length; ++i) {
@@ -61,6 +77,9 @@ int snake_biting_tail(struct snake *self)
     return 0;
 }
 
+/**
+ * Increases the snake's length by one.
+ */
 void snake_grow(struct snake *self)
 {
     if (self->length + 1 == GRID_SIZE * GRID_SIZE)

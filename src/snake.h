@@ -1,19 +1,10 @@
 #ifndef SNAKE_SNAKE_H
 #define SNAKE_SNAKE_H
 
-#define GRID_SIZE   8
+#include "src/constants.h"
 
 #define EATING_APPLE(self, apple)   (self->body[0].x == apple->x && self->body[0].y == apple->y)
 #define FULL_SNAKE(self)            (self->length == GRID_SIZE * GRID_SIZE - 1)
-
-enum directions {
-    UP,
-    DOWN,
-    LEFT,
-    RIGHT,
-    N_DIRECTIONS,
-    STOP,
-};
 
 struct vec2 {
     int x;

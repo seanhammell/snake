@@ -1,15 +1,11 @@
 #include "src/graphics.h"
 
-#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 #include "SDL2/SDL.h"
 
-#include "src/game.h"
-#include "src/snake.h"
-
-#define SCREEN_SIZE (GRID_SIZE * TILE_SIZE)
+#include "src/constants.h"
 
 /**
  * Initializes SDL and creates the window and renderer.

@@ -5,10 +5,14 @@
 
 #include "SDL2/SDL.h"
 
+#include "src/constants.h"
 #include "src/graphics.h"
 #include "src/search.h"
 #include "src/snake.h"
 
+/**
+ * Generates an apple in a random unoccupied position.
+ */
 void random_apple(struct snake *snake, struct vec2 *apple)
 {
     int occupied[GRID_SIZE][GRID_SIZE] = {0};
@@ -21,6 +25,9 @@ void random_apple(struct snake *snake, struct vec2 *apple)
     } while (occupied[apple->x][apple->y]);
 }
 
+/**
+ * Updates the snake's direction based on user input.
+ */
 static void input(SDL_Event *e, struct snake *snake)
 {
     if (e->type == SDL_KEYDOWN) {
@@ -47,9 +54,13 @@ static void input(SDL_Event *e, struct snake *snake)
     }
 }
 
+/**
+ * Moves the snake on a given interval and checks if the snake is eating the
+ * apple or biting its tail.
+ */
 static void update(uint64_t dt, struct snake *snake, struct vec2 *apple)
 {
-    static const uint64_t interval = 5000;
+    static const uint64_t interval = 10;
     static uint64_t elapsed = 0;
 
     if (snake->direction == STOP)
@@ -58,7 +69,7 @@ static void update(uint64_t dt, struct snake *snake, struct vec2 *apple)
     elapsed += dt;
     while (elapsed > interval) {
         elapsed -= interval;
-        search_pathfinder(snake, apple);
+        search_pathfinder(snake);
         snake_move(snake);
 
         if (snake_biting_tail(snake) || FULL_SNAKE(snake)) {
@@ -75,6 +86,9 @@ static void update(uint64_t dt, struct snake *snake, struct vec2 *apple)
     }
 }
 
+/**
+ * Renders the snake and apple to the screen.
+ */
 static void render(struct graphics *graphics, struct snake *snake, struct vec2 *apple)
 {
     SDL_Rect rect = {0, 0, 14, 14};
@@ -83,14 +97,23 @@ static void render(struct graphics *graphics, struct snake *snake, struct vec2 *
     SDL_SetRenderDrawColor(graphics->renderer, 0xAC, 0x38, 0x38, 0xFF);
     SDL_RenderFillRect(graphics->renderer, &rect);
 
+    SDL_SetRenderDrawColor(graphics->renderer, 0x40, 0x98, 0x5E, 0xFF);
     for (int i = 0; i < snake->length; ++i) {
         rect.x = snake->body[i].x * TILE_SIZE;
         rect.y = snake->body[i].y * TILE_SIZE;
-        SDL_SetRenderDrawColor(graphics->renderer, 0x40, 0x98, 0x5E, 0xFF);
         SDL_RenderFillRect(graphics->renderer, &rect);
+
+        if (i > 0) {
+            rect.x += (snake->body[i - 1].x - snake->body[i].x) * 2;
+            rect.y += (snake->body[i - 1].y - snake->body[i].y) * 2;
+            SDL_RenderFillRect(graphics->renderer, &rect);
+        }
     }
 }
 
+/**
+ * Controls the main game loop.
+ */
 void game_loop(void)
 {
     struct graphics *graphics = graphics_create();
@@ -100,6 +123,8 @@ void game_loop(void)
     struct snake *snake = snake_create();
     struct vec2 apple;
     random_apple(snake, &apple);
+
+    search_generate_hamiltonian();
 
     SDL_Event e;
     uint64_t timer = 0;
