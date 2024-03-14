@@ -20,7 +20,12 @@ struct graphics *graphics_create(void)
         return NULL;
     }
 
-    graphics->window = SDL_CreateWindow("Snake", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_SIZE, SCREEN_SIZE, SDL_WINDOW_SHOWN);
+    SDL_Rect monitor;
+    SDL_GetDisplayBounds(SDL_GetNumVideoDisplays() - 1, &monitor);
+    monitor.x += monitor.w / 2 - SCREEN_SIZE / 2;
+    monitor.y += monitor.h / 2 - SCREEN_SIZE / 2;
+
+    graphics->window = SDL_CreateWindow("Snake", monitor.x, monitor.y, SCREEN_SIZE, SCREEN_SIZE, SDL_WINDOW_SHOWN);
     if (graphics->window == NULL) {
         fprintf(stderr, "Error creating window: %s\n", SDL_GetError());
         graphics_destroy(graphics);

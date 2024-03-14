@@ -82,7 +82,7 @@ int snake_biting_tail(struct snake *self)
  */
 void snake_grow(struct snake *self)
 {
-    if (self->length + 1 == GRID_SIZE * GRID_SIZE)
+    if (self->length + 1 == N_CELLS)
         return;
 
     self->body[self->length].x = self->body[self->length - 1].x;

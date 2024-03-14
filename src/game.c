@@ -60,7 +60,7 @@ static void input(SDL_Event *e, struct snake *snake)
  */
 static void update(uint64_t dt, struct snake *snake, struct vec2 *apple)
 {
-    static const uint64_t interval = 10;
+    static const uint64_t interval = 40;
     static uint64_t elapsed = 0;
 
     if (snake->direction == STOP)
@@ -69,7 +69,7 @@ static void update(uint64_t dt, struct snake *snake, struct vec2 *apple)
     elapsed += dt;
     while (elapsed > interval) {
         elapsed -= interval;
-        search_pathfinder(snake);
+        search_pathfinder(snake, apple);
         snake_move(snake);
 
         if (snake_biting_tail(snake) || FULL_SNAKE(snake)) {
@@ -124,7 +124,7 @@ void game_loop(void)
     struct vec2 apple;
     random_apple(snake, &apple);
 
-    search_generate_hamiltonian();
+    search_generate_hamiltonian_cycle();
 
     SDL_Event e;
     uint64_t timer = 0;

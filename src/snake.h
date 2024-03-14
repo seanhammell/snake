@@ -4,7 +4,7 @@
 #include "src/constants.h"
 
 #define EATING_APPLE(self, apple)   (self->body[0].x == apple->x && self->body[0].y == apple->y)
-#define FULL_SNAKE(self)            (self->length == GRID_SIZE * GRID_SIZE - 1)
+#define FULL_SNAKE(self)            (self->length == N_CELLS - 1)
 
 struct vec2 {
     int x;
@@ -12,7 +12,7 @@ struct vec2 {
 };
 
 struct snake {
-    struct vec2 body[GRID_SIZE * GRID_SIZE];
+    struct vec2 body[N_CELLS];
     int length;
     int direction;
 };
