@@ -19,6 +19,12 @@ enum directions {
     STOP,
 };
 
+struct vec2 {
+    int x;
+    int y;
+};
+
 static const int graph_offsets[N_DIRECTIONS] = {-GRAPH_SIZE, GRAPH_SIZE, -1, 1};
+static const struct vec2 step_offsets[N_DIRECTIONS] = {{0, -1}, {0, 1}, {-1, 0}, {1, 0}};
 
 #endif  /* SNAKE_CONSTANTS_H */

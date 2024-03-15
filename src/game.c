@@ -1,7 +1,6 @@
 #include "src/game.h"
 
 #include <stdint.h>
-#include <stdlib.h>
 
 #include "SDL2/SDL.h"
 
@@ -9,21 +8,6 @@
 #include "src/graphics.h"
 #include "src/search.h"
 #include "src/snake.h"
-
-/**
- * Generates an apple in a random unoccupied position.
- */
-void random_apple(struct snake *snake, struct vec2 *apple)
-{
-    int occupied[GRID_SIZE][GRID_SIZE] = {0};
-    for (int i = 0; i < snake->length; ++i)
-        occupied[snake->body[i].x][snake->body[i].y] = 1;
-
-    do {
-        apple->x = rand() % GRID_SIZE;
-        apple->y = rand() % GRID_SIZE;
-    } while (occupied[apple->x][apple->y]);
-}
 
 /**
  * Updates the snake's direction based on user input.
@@ -68,20 +52,12 @@ static int update(uint64_t dt, struct snake *snake, struct vec2 *apple, int *ste
         ++(*steps);
         elapsed -= interval;
         search_pathfinder(snake, apple);
-        snake_move(snake);
+        snake_move(snake, apple);
 
         if (snake_biting_tail(snake) || FULL_SNAKE(snake)) {
             elapsed = 0;
             snake->direction = STOP;
-            if (FULL_SNAKE(snake))
-                random_apple(snake, apple);
-
             return FULL_SNAKE(snake);
-        }
-
-        if (EATING_APPLE(snake, apple)) {
-            snake_grow(snake);
-            random_apple(snake, apple);
         }
     }
 
@@ -122,9 +98,8 @@ int game_loop(struct graphics *graphics, int *steps, int *length)
 
     int steps_copy = *steps;
 
-    struct snake *snake = snake_create();
     struct vec2 apple;
-    random_apple(snake, &apple);
+    struct snake *snake = snake_create(&apple);
 
     search_generate_hamiltonian_cycle();
 

@@ -128,8 +128,6 @@ void search_generate_hamiltonian_cycle(void)
  */
 void search_pathfinder(struct snake *snake, struct vec2 *apple)
 {
-    static const struct vec2 step_offsets[N_DIRECTIONS] = {{0, -1}, {0, 1}, {-1, 0}, {1, 0}};
-
     struct vec2 *head = &snake->body[0];
     snake->direction = hamiltonian_cycle[head->x][head->y].direction;
     if (snake->length > (0.5 * N_CELLS))
