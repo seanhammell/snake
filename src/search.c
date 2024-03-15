@@ -19,6 +19,10 @@ struct path_step {
 
 static struct path_step hamiltonian_cycle[GRID_SIZE][GRID_SIZE];
 
+/**
+ * Determines the distance from the step to the apple along the Hamiltonian
+ * cycle.
+ */
 int path_distance(struct vec2 *step, struct vec2 *apple)
 {
     int step_index = hamiltonian_cycle[step->x][step->y].index;
@@ -29,6 +33,10 @@ int path_distance(struct vec2 *step, struct vec2 *apple)
     return apple_index - step_index;
 }
 
+/**
+ * Ensures the step does not cut too much of the Hamiltonian cycle or overtake
+ * the snake's tail.
+ */
 int safe_path(struct snake *snake, struct vec2 *step, struct vec2 *apple)
 {
     int step_index = hamiltonian_cycle[step->x][step->y].index;
