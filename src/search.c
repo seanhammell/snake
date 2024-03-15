@@ -8,7 +8,9 @@
 #include "src/graph.h"
 #include "src/snake.h"
 
-#define IN_BOUNDS(s) (s.x > -1 && s.y > -1 && s.x < GRID_SIZE && s.y < GRID_SIZE)
+#define IN_BOUNDS(s)            (s.x > -1 && s.y > -1 && s.x < GRID_SIZE && s.y < GRID_SIZE)
+#define CHOMP(s, a)             (s->x == a->x && s->y == a->y)
+#define MAX_CUT(snake, s, a)    (((N_CELLS - snake->length) * 0.4) - CHOMP(s, a))
 
 struct path_step {
     int index;
@@ -27,15 +29,14 @@ int path_distance(struct vec2 *step, struct vec2 *apple)
     return apple_index - step_index;
 }
 
-int safe_path(struct snake *snake, struct vec2 *step)
+int safe_path(struct snake *snake, struct vec2 *step, struct vec2 *apple)
 {
     int step_index = hamiltonian_cycle[step->x][step->y].index;
     int head_index = hamiltonian_cycle[snake->body[0].x][snake->body[0].y].index;
     int tail_index = hamiltonian_cycle[snake->body[snake->length - 1].x][snake->body[snake->length - 1].y].index;
-    int max_cut = N_CELLS - snake->length - 1;
     int cut = step_index < head_index ? step_index + N_CELLS - head_index : step_index - head_index;
 
-    if (cut > max_cut)
+    if (cut > MAX_CUT(snake, step, apple))
         return 0;
 
     for (int i = step_index; i != tail_index; i = (i + 1) % N_CELLS) {
@@ -123,7 +124,8 @@ void search_pathfinder(struct snake *snake, struct vec2 *apple)
 
     struct vec2 *head = &snake->body[0];
     snake->direction = hamiltonian_cycle[head->x][head->y].direction;
-    (void) apple;
+    if (snake->length > (0.5 * N_CELLS))
+        return;
 
     uint8_t occupied[GRID_SIZE][GRID_SIZE] = {0};
     for (int i = 0; i < snake->length; ++i)
@@ -135,7 +137,7 @@ void search_pathfinder(struct snake *snake, struct vec2 *apple)
         step.x = head->x + step_offsets[d].x;
         step.y = head->y + step_offsets[d].y;
         int distance = path_distance(&step, apple);
-        if (IN_BOUNDS(step) && !occupied[step.x][step.y] && distance < shortest && safe_path(snake, &step)) {
+        if (IN_BOUNDS(step) && !occupied[step.x][step.y] && distance < shortest && safe_path(snake, &step, apple)) {
             shortest = distance;
             snake->direction = d;
         }

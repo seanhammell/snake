@@ -58,25 +58,25 @@ static void input(SDL_Event *e, struct snake *snake)
  * Moves the snake on a given interval and checks if the snake is eating the
  * apple or biting its tail.
  */
-static void update(uint64_t dt, struct snake *snake, struct vec2 *apple)
+static int update(uint64_t dt, struct snake *snake, struct vec2 *apple, int *steps)
 {
-    static const uint64_t interval = 40;
+    static const uint64_t interval = 20;
     static uint64_t elapsed = 0;
-
-    if (snake->direction == STOP)
-        return;
 
     elapsed += dt;
     while (elapsed > interval) {
+        ++(*steps);
         elapsed -= interval;
         search_pathfinder(snake, apple);
         snake_move(snake);
 
         if (snake_biting_tail(snake) || FULL_SNAKE(snake)) {
+            elapsed = 0;
             snake->direction = STOP;
             if (FULL_SNAKE(snake))
                 random_apple(snake, apple);
-            return;
+
+            return FULL_SNAKE(snake);
         }
 
         if (EATING_APPLE(snake, apple)) {
@@ -84,6 +84,8 @@ static void update(uint64_t dt, struct snake *snake, struct vec2 *apple)
             random_apple(snake, apple);
         }
     }
+
+    return -1;
 }
 
 /**
@@ -114,11 +116,11 @@ static void render(struct graphics *graphics, struct snake *snake, struct vec2 *
 /**
  * Controls the main game loop.
  */
-void game_loop(void)
+int game_loop(struct graphics *graphics, int *steps, int *length)
 {
-    struct graphics *graphics = graphics_create();
-    if (graphics == NULL)
-        return;
+    static uint64_t timer = 0;
+
+    int steps_copy = *steps;
 
     struct snake *snake = snake_create();
     struct vec2 apple;
@@ -127,25 +129,30 @@ void game_loop(void)
     search_generate_hamiltonian_cycle();
 
     SDL_Event e;
-    uint64_t timer = 0;
     for (;;) {
         while (SDL_PollEvent(&e)) {
             if (e.type == SDL_QUIT) {
                 snake_destroy(snake);
-                graphics_destroy(graphics);
-                return;
+                return 0;
             }
 
             input(&e, snake);
         }
 
         uint64_t now = SDL_GetTicks64();
-        update(now - timer, snake, &apple);
+        int status = update(now - timer, snake, &apple, steps);
         timer = now;
 
         SDL_SetRenderDrawColor(graphics->renderer, 0x11, 0x11, 0x11, 0xFF);
         SDL_RenderClear(graphics->renderer);
         render(graphics, snake, &apple);
         SDL_RenderPresent(graphics->renderer);
+
+        if (status > -1) {
+            if (!status)
+                *steps = steps_copy;
+            *length += snake->length + status;
+            return status;
+        }
     }
 }
