@@ -42,7 +42,7 @@ static void input(SDL_Event *e, struct snake *snake)
  * Moves the snake on a given interval and checks if the snake is eating the
  * apple or biting its tail.
  */
-static int update(uint64_t dt, struct snake *snake, struct vec2 *apple, int *steps)
+static int update(uint64_t dt, struct snake *snake, int *steps)
 {
     static const uint64_t interval = 20;
     static uint64_t elapsed = 0;
@@ -51,8 +51,8 @@ static int update(uint64_t dt, struct snake *snake, struct vec2 *apple, int *ste
     while (elapsed > interval) {
         ++(*steps);
         elapsed -= interval;
-        search_pathfinder(snake, apple);
-        snake_move(snake, apple);
+        search_pathfinder(snake, &snake->apple);
+        snake_move(snake);
 
         if (snake_biting_tail(snake) || FULL_SNAKE(snake)) {
             elapsed = 0;
@@ -67,11 +67,11 @@ static int update(uint64_t dt, struct snake *snake, struct vec2 *apple, int *ste
 /**
  * Renders the snake and apple to the screen.
  */
-static void render(struct graphics *graphics, struct snake *snake, struct vec2 *apple)
+static void render(struct graphics *graphics, struct snake *snake)
 {
     SDL_Rect rect = {0, 0, 14, 14};
-    rect.x = apple->x * TILE_SIZE;
-    rect.y = apple->y * TILE_SIZE;
+    rect.x = snake->apple.x * TILE_SIZE;
+    rect.y = snake->apple.y * TILE_SIZE;
     SDL_SetRenderDrawColor(graphics->renderer, 0xAC, 0x38, 0x38, 0xFF);
     SDL_RenderFillRect(graphics->renderer, &rect);
 
@@ -98,8 +98,7 @@ int game_loop(struct graphics *graphics, int *steps, int *length)
 
     int steps_copy = *steps;
 
-    struct vec2 apple;
-    struct snake *snake = snake_create(&apple);
+    struct snake *snake = snake_create();
 
     search_generate_hamiltonian_cycle();
 
@@ -115,12 +114,12 @@ int game_loop(struct graphics *graphics, int *steps, int *length)
         }
 
         uint64_t now = SDL_GetTicks64();
-        int status = update(now - timer, snake, &apple, steps);
+        int status = update(now - timer, snake, steps);
         timer = now;
 
         SDL_SetRenderDrawColor(graphics->renderer, 0x11, 0x11, 0x11, 0xFF);
         SDL_RenderClear(graphics->renderer);
-        render(graphics, snake, &apple);
+        render(graphics, snake);
         SDL_RenderPresent(graphics->renderer);
 
         if (status > -1) {
