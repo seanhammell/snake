@@ -17,7 +17,7 @@ struct snake *snake_create(void);
 struct snake *snake_copy(struct snake *self);
 void snake_destroy(struct snake *self);
 
-void snake_move(struct snake *self);
+int snake_move(struct snake *self);
 int snake_biting_tail(struct snake *self);
 
 #endif  /* SNAKE_SNAKE_H */

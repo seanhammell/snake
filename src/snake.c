@@ -60,6 +60,8 @@ struct snake *snake_copy(struct snake *self)
         copy->body[i] = self->body[i];
     copy->length = self->length;
     copy->direction = self->direction;
+    copy->apple.x = self->apple.x;
+    copy->apple.y = self->apple.y;
     return copy;
 }
 
@@ -72,9 +74,10 @@ void snake_destroy(struct snake *self)
 }
 
 /**
- * Moves the snake one step in the direction it is facing.
+ * Moves the snake one step in the direction it is facing and return if the
+ * move resulted in the snake eating the apple.
  */
-void snake_move(struct snake *self)
+int snake_move(struct snake *self)
 {
     struct vec2 step;
     step.x = self->body[0].x + step_offsets[self->direction].x;
@@ -88,8 +91,12 @@ void snake_move(struct snake *self)
     self->body[0].x += step_offsets[self->direction].x;
     self->body[0].y += step_offsets[self->direction].y;
 
-    if (step.x == self->apple.x && step.y == self->apple.y)
+    if (step.x == self->apple.x && step.y == self->apple.y) {
         random_apple(self);
+        return 1;
+    }
+
+    return 0;
 }
 
 /**
