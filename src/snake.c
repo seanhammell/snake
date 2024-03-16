@@ -85,20 +85,8 @@ void snake_move(struct snake *self, struct vec2 *apple)
     for (int i = self->length - 1; i > 0; --i)
         self->body[i] = self->body[i - 1];
 
-    switch (self->direction) {
-    case UP:
-        --self->body[0].y;
-        break;
-    case DOWN:
-        ++self->body[0].y;
-        break;
-    case LEFT:
-        --self->body[0].x;
-        break;
-    case RIGHT:
-        ++self->body[0].x;
-        break;
-    }
+    self->body[0].x += step_offsets[self->direction].x;
+    self->body[0].y += step_offsets[self->direction].y;
 
     if (step.x == apple->x && step.y == apple->y)
         random_apple(self, apple);
