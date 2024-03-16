@@ -81,16 +81,16 @@ int snake_move(struct snake *self)
 {
     if (self->direction < N_DIRECTIONS) {
         struct vec2 step;
-        step.x = self->body[0].x + step_offsets[self->direction].x;
-        step.y = self->body[0].y + step_offsets[self->direction].y;
+        step.x = self->body[0].x + offsets[self->direction].x;
+        step.y = self->body[0].y + offsets[self->direction].y;
         if (step.x == self->apple.x && step.y == self->apple.y)
             grow(self);
 
         for (int i = self->length - 1; i > 0; --i)
             self->body[i] = self->body[i - 1];
 
-        self->body[0].x += step_offsets[self->direction].x;
-        self->body[0].y += step_offsets[self->direction].y;
+        self->body[0].x += offsets[self->direction].x;
+        self->body[0].y += offsets[self->direction].y;
 
         if (step.x == self->apple.x && step.y == self->apple.y) {
             random_apple(self);
