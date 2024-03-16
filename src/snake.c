@@ -42,8 +42,8 @@ void random_apple(struct snake *self)
 struct snake *snake_create(void)
 {
     struct snake *self = malloc(sizeof(struct snake));
-    self->body[0].x = GRID_SIZE / 2 - 1;
-    self->body[0].y = GRID_SIZE / 2 - 1;
+    self->body[0].x = rand() % GRID_SIZE;
+    self->body[0].y = rand() % GRID_SIZE;
     self->length = 1;
     self->direction = N_DIRECTIONS;
     random_apple(self);
@@ -79,21 +79,23 @@ void snake_destroy(struct snake *self)
  */
 int snake_move(struct snake *self)
 {
-    struct vec2 step;
-    step.x = self->body[0].x + step_offsets[self->direction].x;
-    step.y = self->body[0].y + step_offsets[self->direction].y;
-    if (step.x == self->apple.x && step.y == self->apple.y)
-        grow(self);
+    if (self->direction < N_DIRECTIONS) {
+        struct vec2 step;
+        step.x = self->body[0].x + step_offsets[self->direction].x;
+        step.y = self->body[0].y + step_offsets[self->direction].y;
+        if (step.x == self->apple.x && step.y == self->apple.y)
+            grow(self);
 
-    for (int i = self->length - 1; i > 0; --i)
-        self->body[i] = self->body[i - 1];
+        for (int i = self->length - 1; i > 0; --i)
+            self->body[i] = self->body[i - 1];
 
-    self->body[0].x += step_offsets[self->direction].x;
-    self->body[0].y += step_offsets[self->direction].y;
+        self->body[0].x += step_offsets[self->direction].x;
+        self->body[0].y += step_offsets[self->direction].y;
 
-    if (step.x == self->apple.x && step.y == self->apple.y) {
-        random_apple(self);
-        return 1;
+        if (step.x == self->apple.x && step.y == self->apple.y) {
+            random_apple(self);
+            return 1;
+        }
     }
 
     return 0;

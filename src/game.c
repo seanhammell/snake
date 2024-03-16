@@ -17,19 +17,19 @@ static void input(SDL_Event *e, struct snake *snake)
     if (e->type == SDL_KEYDOWN) {
         switch (e->key.keysym.sym) {
         case SDLK_UP:
-            if (snake->body[0].y - 1 != snake->body[1].y)
+            if (snake->length < 2 || snake->body[0].y - 1 != snake->body[1].y)
                 snake->direction = UP;
             break;
         case SDLK_DOWN:
-            if (snake->body[0].y + 1 != snake->body[1].y)
+            if (snake->length < 2 || snake->body[0].y + 1 != snake->body[1].y)
                 snake->direction = DOWN;
             break;
         case SDLK_LEFT:
-            if (snake->body[0].x - 1 != snake->body[1].x)
+            if (snake->length < 2 || snake->body[0].x - 1 != snake->body[1].x)
                 snake->direction = LEFT;
             break;
         case SDLK_RIGHT:
-            if (snake->body[0].x + 1 != snake->body[1].x)
+            if (snake->length < 2 || snake->body[0].x + 1 != snake->body[1].x)
                 snake->direction = RIGHT;
             break;
         default:
@@ -44,14 +44,14 @@ static void input(SDL_Event *e, struct snake *snake)
  */
 static int update(uint64_t dt, struct snake *snake, int *steps)
 {
-    static const uint64_t interval = 20;
+    static const uint64_t interval = 10;
     static uint64_t elapsed = 0;
 
     elapsed += dt;
     while (elapsed > interval) {
         ++(*steps);
         elapsed -= interval;
-        search_pathfinder(snake, &snake->apple);
+        search_pathfinder(snake);
         snake_move(snake);
 
         if (snake_biting_tail(snake) || FULL_SNAKE(snake)) {
@@ -89,6 +89,8 @@ static void render(struct graphics *graphics, struct snake *snake)
     }
 }
 
+#include <stdio.h>
+
 /**
  * Controls the main game loop.
  */
@@ -96,13 +98,10 @@ int game_loop(struct graphics *graphics, int *steps, int *length)
 {
     static uint64_t timer = 0;
 
-    int steps_copy = *steps;
-
     struct snake *snake = snake_create();
 
-    search_generate_hamiltonian_cycle();
-
     SDL_Event e;
+    int steps_copy = *steps;
     for (;;) {
         while (SDL_PollEvent(&e)) {
             if (e.type == SDL_QUIT) {

@@ -3,7 +3,6 @@
 
 #include "src/snake.h"
 
-void search_generate_hamiltonian_cycle(void);
-void search_pathfinder(struct snake *snake, struct vec2 *apple);
+void search_pathfinder(struct snake *snake);
 
 #endif  /* SNAKE_SEARCH_H */
