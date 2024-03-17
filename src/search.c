@@ -5,8 +5,6 @@
 
 #include "src/constants.h"
 
-#define MANHATTAN(a, b) (abs(a.x - b.x) + abs(a.y - b.y))
-
 struct queue {
     struct vec2 queue[N_CELLS];
     int head;

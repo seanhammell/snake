@@ -7,6 +7,7 @@
 #define TILE_SIZE   16
 #define SCREEN_SIZE (GRID_SIZE * TILE_SIZE)
 
+#define MANHATTAN(a, b) (abs(a.x - b.x) + abs(a.y - b.y))
 #define IN_BOUNDS(x, y) (x > -1 && y > -1 && x < GRID_SIZE && y < GRID_SIZE)
 #define OCCUPIED(s)\
     uint8_t occupied[GRID_SIZE][GRID_SIZE] = {0};\
