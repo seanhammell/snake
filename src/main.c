@@ -4,9 +4,12 @@
 
 #include "SDL2/SDL.h"
 
+#include "src/constants.h"
 #include "src/game.h"
 
 #define N_TRIALS    1
+
+struct search_info search_info;
 
 int main(void)
 {
@@ -16,22 +19,24 @@ int main(void)
     if (graphics == NULL)
         return 0;
 
-    int steps = 0;
-    int length = 0;
-    int completed = 0;
-    int total = 0;
+    search_info.steps = 0;
+    search_info.length = 0;
+    search_info.nodes = 0;
+    search_info.completed = 0;
+    search_info.total = 0;
 
     fprintf(stderr, "\n");
     for (int i = 0; i < N_TRIALS; ++i) {
-        ++total;
-        if (game_loop(graphics, &steps, &length))
-            ++completed;
+        ++search_info.total;
+        if (game_loop(graphics))
+            ++search_info.completed;
 
         fprintf(stderr,
-                "\rCompleted:%7.2f%%, Average Steps:%5d, Average Length:%6.2f",
-                (completed / (float) total) * 100,
-                steps / completed,
-                length / (float) total);
+                "\rCompleted:%7.2f%%, Average Length:%6.2f, Average Steps:%5d, Average Nodes: %8d",
+                (search_info.completed / (float) search_info.total) * 100,
+                search_info.length / (float) search_info.total,
+                search_info.steps / search_info.completed,
+                search_info.nodes / search_info.completed);
     }
 
     fprintf(stderr, "\n\n");

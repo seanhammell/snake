@@ -3,6 +3,6 @@
 
 #include "src/graphics.h"
 
-int game_loop(struct graphics *graphics, int *steps, int *length);
+int game_loop(struct graphics *graphics);
 
 #endif  /* SNAKE_GAME_H */

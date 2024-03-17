@@ -23,4 +23,14 @@ struct vec2 {
 
 static const struct vec2 offsets[N_DIRECTIONS] = {{0, -1}, {0, 1}, {-1, 0}, {1, 0}};
 
+struct search_info {
+    int steps;
+    int length;
+    int nodes;
+    int completed;
+    int total;
+};
+
+extern struct search_info search_info;
+
 #endif  /* SNAKE_CONSTANTS_H */

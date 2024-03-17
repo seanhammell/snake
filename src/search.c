@@ -37,6 +37,7 @@ int safe_path(struct snake *snake)
 
     struct vec2 current;
     while (queue.head < queue.tail) {
+        ++search_info.nodes;
         current.x = queue.queue[queue.head].x;
         current.y = queue.queue[queue.head].y;
 
@@ -72,6 +73,7 @@ int simulate(struct snake *snake, int depth)
     OCCUPIED;
     struct vec2 step;
     for (int d = 0; d < N_DIRECTIONS; ++d) {
+        ++search_info.nodes;
         step.x = snake->body[0].x + offsets[d].x;
         step.y = snake->body[0].y + offsets[d].y;
         if (IN_BOUNDS(step.x, step.y) && !occupied[step.x][step.y]) {
@@ -99,6 +101,7 @@ void search_pathfinder(struct snake *snake)
     int base = MANHATTAN(snake->body[0], snake->apple);
     for (int depth = base;; ++depth) {
         for (int d = 0; d < N_DIRECTIONS; ++d) {
+            ++search_info.nodes;
             step.x = snake->body[0].x + offsets[d].x;
             step.y = snake->body[0].y + offsets[d].y;
             if (IN_BOUNDS(step.x, step.y) && !occupied[step.x][step.y]) {
