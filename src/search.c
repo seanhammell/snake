@@ -4,78 +4,78 @@
 #include <stdlib.h>
 
 #include "src/constants.h"
+#include "src/queue.h"
 
-struct queue {
-    struct vec2 queue[N_CELLS];
-    int head;
-    int tail;
-};
+#define FOUND   0
 
+/**
+ * Determines if a path is safe by checking if the snake can see its tail.
+ */
 int safe_path(struct snake *snake)
 {
     if (snake->length < 4)
         return 1;
 
+    struct priority_queue *queue = queue_create();
+    struct node_args args = {snake->body[0], snake->body[snake->length - 1], 0};
+    queue_enqueue(queue, &args);
+
     OCCUPIED(snake);
 
-    struct queue queue;
-    queue.head = 0;
-    queue.tail = 0;
-
-    queue.queue[queue.tail].x = snake->body[0].x;
-    queue.queue[queue.tail].y = snake->body[0].y;
-    ++queue.tail;
-
-    struct vec2 current;
-    while (queue.head < queue.tail) {
+    struct node *current;
+    while (queue->head < queue->tail) {
         ++search_info.nodes;
-        current.x = queue.queue[queue.head].x;
-        current.y = queue.queue[queue.head].y;
+        current = queue_dequeue(queue);
 
-        if (current.x == snake->body[snake->length - 1].x && current.y == snake->body[snake->length - 1].y)
+        if (VEC2_MATCH(current->position, args.goal)) {
+            queue_destroy(queue);
             return 1;
+        }
 
-        ++queue.head;
-        occupied[current.x][current.y] = 1;
+        args.reachable = current->reachable + 1;
         for (int d = 0; d < N_DIRECTIONS; ++d) {
-            queue.queue[queue.tail].x = current.x + offsets[d].x;
-            queue.queue[queue.tail].y = current.y + offsets[d].y;
-            int in_queue = 0;
-            for (int i = queue.head; i < queue.tail; ++i) {
-                if (queue.queue[queue.tail].x == queue.queue[i].x && queue.queue[queue.tail].y == queue.queue[i].y) {
-                    in_queue = 1;
-                    break;
-                }
+            args.position.x = current->position.x + offsets[d].x;
+            args.position.y = current->position.y + offsets[d].y;
+            if (IN_BOUNDS(args.position.x, args.position.y) && !occupied[args.position.x][args.position.y]) {
+                queue_enqueue(queue, &args);
+                occupied[args.position.x][args.position.y] = 1;
             }
-
-            if (IN_BOUNDS(queue.queue[queue.tail].x, queue.queue[queue.tail].y) && !occupied[queue.queue[queue.tail].x][queue.queue[queue.tail].y] && !in_queue)
-                ++queue.tail;
         }
     }
 
+    queue_destroy(queue);
     return 0;
 }
 
-int simulate(struct snake *snake, int depth)
+/**
+ * Simulates the possible moves from the current position and returns the cost
+ * closest to the goal.
+ */
+int simulate(struct snake *snake, int bound, int reachable)
 {
-    if (depth == 0)
-        return 0;
+    if (reachable + MANHATTAN(snake->body[0], snake->apple) > bound)
+        return reachable + MANHATTAN(snake->body[0], snake->apple);
 
     int moves[N_DIRECTIONS];
     int n_moves = snake_generate_moves(snake, moves);
+    int min = N_CELLS;
+    int result;
     for (int i = 0; i < n_moves; ++i) {
         ++search_info.nodes;
         struct snake *copy = snake_copy(snake);
         copy->direction = moves[i];
-        if ((snake_move(copy) && safe_path(copy)) || simulate(copy, depth - 1)) {
+        if ((snake_move(copy) && safe_path(copy)) || (result = simulate(copy, bound, reachable + 1)) == FOUND) {
             snake_destroy(copy);
-            return 1;
+            return FOUND;
         }
+
+        if (result < min)
+            min = result;
 
         snake_destroy(copy);
     }
 
-    return 0;
+    return min;
 }
 
 /**
@@ -83,16 +83,16 @@ int simulate(struct snake *snake, int depth)
  */
 void search_pathfinder(struct snake *snake)
 {
-    int base = MANHATTAN(snake->body[0], snake->apple);
     int moves[N_DIRECTIONS];
     int n_moves = snake_generate_moves(snake, moves);
-
-    for (int depth = base;; ++depth) {
+    int bound = MANHATTAN(snake->body[0], snake->apple);
+    int result;
+    for (;;) {
         for (int i = 0; i < n_moves; ++i) {
             ++search_info.nodes;
             struct snake *copy = snake_copy(snake);
             copy->direction = moves[i];
-            if ((snake_move(copy) && safe_path(copy)) || simulate(copy, depth - 1)) {
+            if ((snake_move(copy) && safe_path(copy)) || (result = simulate(copy, bound, 1)) == FOUND) {
                 snake->direction = moves[i];
                 snake_destroy(copy);
                 return;
@@ -100,5 +100,7 @@ void search_pathfinder(struct snake *snake)
 
             snake_destroy(copy);
         }
+
+        bound = result;
     }
 }

@@ -1,6 +1,8 @@
 #ifndef SNAKE_CONSTANTS_H
 #define SNAKE_CONSTANTS_H
 
+#include <stdlib.h>
+
 #define GRID_SIZE   6
 #define N_CELLS     (GRID_SIZE * GRID_SIZE)
 
@@ -28,6 +30,8 @@ struct vec2 {
     int x;
     int y;
 };
+
+#define VEC2_MATCH(a, b)    (a.x == b.x && a.y == b.y)
 
 static const struct vec2 offsets[N_DIRECTIONS] = {{0, -1}, {0, 1}, {-1, 0}, {1, 0}};
 

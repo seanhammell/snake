@@ -32,9 +32,10 @@ int main(void)
             ++search_info.completed;
 
         fprintf(stderr,
-                "\r%3d Trial(s), Completed:%7.2f%%, Average Length:%6.2f, Average Steps:%5d, Average Nodes: %8d",
+                "\r%3d Trial(s), Completed: %d/%d, Average Length:%6.2f, Average Steps:%5d, Average Nodes: %8d",
                 i + 1,
-                (search_info.completed / (float) search_info.total) * 100,
+                search_info.completed,
+                search_info.total,
                 search_info.length / (float) search_info.total,
                 search_info.steps / search_info.completed,
                 search_info.nodes / search_info.completed);
