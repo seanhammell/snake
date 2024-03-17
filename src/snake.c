@@ -74,6 +74,26 @@ void snake_destroy(struct snake *self)
 }
 
 /**
+ * Generates the directions the snake may move in the current position.
+ */
+int snake_generate_moves(struct snake *self, int moves[N_DIRECTIONS])
+{
+    OCCUPIED(self);
+    int n_moves = 0;
+    struct vec2 step;
+    for (int d = 0; d < N_DIRECTIONS; ++d) {
+        step.x = self->body[0].x + offsets[d].x;
+        step.y = self->body[0].y + offsets[d].y;
+        if (IN_BOUNDS(step.x, step.y) && !occupied[step.x][step.y]) {
+            moves[n_moves] = d;
+            ++n_moves;
+        }
+    }
+
+    return n_moves;
+}
+
+/**
  * Moves the snake one step in the direction it is facing and return if the
  * move resulted in the snake eating the apple.
  */

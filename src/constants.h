@@ -7,6 +7,13 @@
 #define TILE_SIZE   16
 #define SCREEN_SIZE (GRID_SIZE * TILE_SIZE)
 
+#define IN_BOUNDS(x, y) (x > -1 && y > -1 && x < GRID_SIZE && y < GRID_SIZE)
+#define OCCUPIED(s)\
+    uint8_t occupied[GRID_SIZE][GRID_SIZE] = {0};\
+    for (int i = 0; i < s->length - 1; ++i)\
+        occupied[s->body[i].x][s->body[i].y] = 1;\
+    occupied[s->body[s->length - 1].x][s->body[s->length - 1].y] = s->length < 3;
+
 enum directions {
     UP,
     DOWN,
