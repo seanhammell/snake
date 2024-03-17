@@ -44,7 +44,7 @@ static void input(SDL_Event *e, struct snake *snake)
  */
 static int update(uint64_t dt, struct snake *snake, int *steps)
 {
-    static const uint64_t interval = 50;
+    static const uint64_t interval = 100;
     static uint64_t elapsed = 0;
 
     elapsed += dt;

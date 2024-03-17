@@ -1,7 +1,7 @@
 #ifndef SNAKE_CONSTANTS_H
 #define SNAKE_CONSTANTS_H
 
-#define GRID_SIZE   4
+#define GRID_SIZE   6
 #define N_CELLS     (GRID_SIZE * GRID_SIZE)
 
 #define TILE_SIZE   16

@@ -9,7 +9,6 @@ struct snake {
     struct vec2 body[N_CELLS];
     int length;
     int direction;
-
     struct vec2 apple;
 };
 
