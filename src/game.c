@@ -39,8 +39,7 @@ static void input(SDL_Event *e, struct snake *snake)
 }
 
 /**
- * Moves the snake on a given interval and checks if the snake is eating the
- * apple or biting its tail.
+ * Moves the snake and checks if it has filled the board or hit an obstacle.
  */
 static int update(uint64_t dt, struct snake *snake)
 {

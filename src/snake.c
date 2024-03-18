@@ -74,8 +74,8 @@ void snake_destroy(struct snake *self)
 }
 
 /**
- * Generates the snake's possible moves in ascending order of Manhattan
- * distance to the apple, preferring straight lines.
+ * Generates the snake's possible moves in descending order of Manhattan
+ * distance to its tail, preferring straight lines.
  */
 int snake_generate_moves(struct snake *self, int moves[N_DIRECTIONS])
 {
@@ -87,11 +87,10 @@ int snake_generate_moves(struct snake *self, int moves[N_DIRECTIONS])
         step.x = self->body[0].x + offsets[d].x;
         step.y = self->body[0].y + offsets[d].y;
         if (IN_BOUNDS(step.x, step.y) && !occupied[step.x][step.y]) {
-            int value = MANHATTAN(step, self->apple);
-
+            int value = MANHATTAN(step, self->body[self->length - 1]);
             int i = 0;
             for (; i < n_moves; ++i) {
-                if (value < step_values[i])
+                if (value > step_values[i] || (value == step_values[i] && d == self->direction))
                     break;
             }
 

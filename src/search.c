@@ -10,9 +10,11 @@
 #define FOUND   0
 
 /**
- * Determines if a path is safe by checking if the snake can see its tail.
+ * Determines if a path is safe by checking if the snake can see its tail. If
+ * fill is set, the check continues until the queue is empty, attempting to
+ * fill the grid.
  */
-int safe_path(struct snake *snake)
+int path_safe(struct snake *snake, int fill)
 {
     if (snake->length < 4)
         return 1;
@@ -27,7 +29,7 @@ int safe_path(struct snake *snake)
         ++search_info.nodes;
         current = queue_dequeue(queue);
 
-        if (VEC2_MATCH(current->position, args.goal)) {
+        if (VEC2_MATCH(current->position, args.goal) && !fill) {
             queue_destroy(queue);
             return 1;
         }
@@ -44,14 +46,48 @@ int safe_path(struct snake *snake)
     }
 
     queue_destroy(queue);
+    if (!fill)
+        return 0;
+
+    for (int x = 0; x < GRID_SIZE; ++x) {
+        for (int y = 0; y < GRID_SIZE; ++y) {
+            if (!occupied[x][y])
+                return 0;
+        }
+    }
+
+    return 1;
+}
+
+/**
+ * Returns if any move from the current position can see all unoccupied cells
+ * on the grid.
+ */
+int fill_unoccupied(struct snake *snake)
+{
+    int moves[N_DIRECTIONS];
+    int n_moves = snake_generate_moves(snake, moves);
+    for (int i = 0; i < n_moves; ++i) {
+        struct snake *copy = snake_copy(snake);
+        copy->direction = moves[i];
+        snake_move(copy);
+        if (path_safe(copy, 1)) {
+            snake_destroy(copy);
+            return 1;
+        }
+
+        snake_destroy(copy);
+    }
+
     return 0;
 }
 
 /**
- * Simulates the possible moves from the current position and returns the cost
- * closest to the goal.
+ * Makes the possible moves from the current position and returns if the snake
+ * eats the apple, or the cost closest to the goal if the cost exceeds the
+ * bound limit.
  */
-int simulate(struct snake *snake, int bound, int reachable)
+int iterative_deepening_astar(struct snake *snake, int bound, int reachable)
 {
     int cost = reachable + MANHATTAN(snake->body[0], snake->apple);
     if (cost > bound)
@@ -64,7 +100,7 @@ int simulate(struct snake *snake, int bound, int reachable)
         ++search_info.nodes;
         struct snake *copy = snake_copy(snake);
         copy->direction = moves[i];
-        if ((snake_move(copy) && safe_path(copy)) || (cost = simulate(copy, bound, reachable + 1)) == FOUND) {
+        if ((snake_move(copy) && fill_unoccupied(copy)) || (cost = iterative_deepening_astar(copy, bound, reachable + 1)) == FOUND) {
             snake_destroy(copy);
             return FOUND;
         }
@@ -79,7 +115,9 @@ int simulate(struct snake *snake, int bound, int reachable)
 }
 
 /**
- * Updates the snake's direction based on the pathfinding algorithm.
+ * Attempts to find a path using iterative deepening A*. If no path is found
+ * when the depth bound is hit, select the move that moves farthest from the
+ * tail without losing sight of the tail.
  */
 void search_pathfinder(struct snake *snake)
 {
@@ -88,13 +126,13 @@ void search_pathfinder(struct snake *snake)
 
     int moves[N_DIRECTIONS];
     int n_moves = snake_generate_moves(snake, moves);
-    for (;;) {
+    while (bound < (N_CELLS - snake->length)) {
         min = INT_MAX;
         for (int i = 0; i < n_moves; ++i) {
             ++search_info.nodes;
             struct snake *copy = snake_copy(snake);
             copy->direction = moves[i];
-            if ((snake_move(copy) && safe_path(copy)) || (cost = simulate(copy, bound, 1)) == FOUND) {
+            if ((snake_move(copy) && fill_unoccupied(copy)) || (cost = iterative_deepening_astar(copy, bound, 1)) == FOUND) {
                 snake->direction = moves[i];
                 snake_destroy(copy);
                 return;
@@ -107,5 +145,18 @@ void search_pathfinder(struct snake *snake)
         }
 
         bound = min;
+    }
+
+    for (int i = 0; i < n_moves; ++i) {
+        struct snake *copy = snake_copy(snake);
+        copy->direction = moves[i];
+        snake_move(copy);
+        if (path_safe(copy, 0)) {
+            snake->direction = moves[i];
+            snake_destroy(copy);
+            return;
+        }
+
+        snake_destroy(copy);
     }
 }

@@ -5,6 +5,9 @@
 
 #include "src/constants.h"
 
+/**
+ * Creates a new queue.
+ */
 struct priority_queue *queue_create(void)
 {
     struct priority_queue *queue = malloc(sizeof(struct priority_queue));
@@ -21,6 +24,9 @@ struct priority_queue *queue_create(void)
     return queue;
 }
 
+/**
+ * Destroys the queue.
+ */
 void queue_destroy(struct priority_queue *queue)
 {
     for (int i = 0; i < N_CELLS; ++i)
@@ -28,6 +34,9 @@ void queue_destroy(struct priority_queue *queue)
     free(queue);
 }
 
+/**
+ * Enqueues a node based on the A* function.
+ */
 void queue_enqueue(struct priority_queue *queue, struct node_args *args)
 {
     if (queue->tail == N_CELLS) {
@@ -54,6 +63,9 @@ void queue_enqueue(struct priority_queue *queue, struct node_args *args)
     ++queue->tail;
 }
 
+/**
+ * Dequeues the node at the head of the queue.
+ */
 struct node *queue_dequeue(struct priority_queue *queue)
 {
     if (queue->head == queue->tail) {
