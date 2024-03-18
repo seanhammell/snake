@@ -115,7 +115,7 @@ int snake_move(struct snake *self, int hungry)
         struct vec2 step;
         step.x = self->body[0].x + offsets[self->direction].x;
         step.y = self->body[0].y + offsets[self->direction].y;
-        if (step.x == self->apple.x && step.y == self->apple.y && hungry)
+        if (VEC2_MATCH(step, self->apple) && hungry)
             grow(self);
 
         for (int i = self->length - 1; i > 0; --i)
@@ -124,7 +124,7 @@ int snake_move(struct snake *self, int hungry)
         self->body[0].x += offsets[self->direction].x;
         self->body[0].y += offsets[self->direction].y;
 
-        if (step.x == self->apple.x && step.y == self->apple.y && hungry) {
+        if (VEC2_MATCH(step, self->apple) && hungry) {
             random_apple(self);
             return 1;
         }

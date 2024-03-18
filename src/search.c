@@ -53,24 +53,24 @@ int safe_path(struct snake *snake)
  */
 int simulate(struct snake *snake, int bound, int reachable)
 {
-    if (reachable + MANHATTAN(snake->body[0], snake->apple) > bound)
-        return reachable + MANHATTAN(snake->body[0], snake->apple);
+    int cost = reachable + MANHATTAN(snake->body[0], snake->apple);
+    if (cost > bound)
+        return cost;
 
     int moves[N_DIRECTIONS];
     int n_moves = snake_generate_moves(snake, moves);
     int min = N_CELLS;
-    int result;
     for (int i = 0; i < n_moves; ++i) {
         ++search_info.nodes;
         struct snake *copy = snake_copy(snake);
         copy->direction = moves[i];
-        if ((snake_move(copy, 1) && safe_path(copy)) || (result = simulate(copy, bound, reachable + 1)) == FOUND) {
+        if ((snake_move(copy, 1) && safe_path(copy)) || (cost = simulate(copy, bound, reachable + 1)) == FOUND) {
             snake_destroy(copy);
             return FOUND;
         }
 
-        if (result < min)
-            min = result;
+        if (cost < min)
+            min = cost;
 
         snake_destroy(copy);
     }
@@ -86,13 +86,13 @@ void search_pathfinder(struct snake *snake)
     int moves[N_DIRECTIONS];
     int n_moves = snake_generate_moves(snake, moves);
     int bound = MANHATTAN(snake->body[0], snake->apple);
-    int result;
+    int cost;
     for (;;) {
         for (int i = 0; i < n_moves; ++i) {
             ++search_info.nodes;
             struct snake *copy = snake_copy(snake);
             copy->direction = moves[i];
-            if ((snake_move(copy, 1) && safe_path(copy)) || (result = simulate(copy, bound, 1)) == FOUND) {
+            if ((snake_move(copy, 1) && safe_path(copy)) || (cost = simulate(copy, bound, 1)) == FOUND) {
                 snake->direction = moves[i];
                 snake_destroy(copy);
                 return;
@@ -101,6 +101,6 @@ void search_pathfinder(struct snake *snake)
             snake_destroy(copy);
         }
 
-        bound = result;
+        bound = cost;
     }
 }
