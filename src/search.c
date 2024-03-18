@@ -1,5 +1,6 @@
 #include "src/search.h"
 
+#include <limits.h>
 #include <stdint.h>
 #include <stdlib.h>
 
@@ -58,7 +59,7 @@ int simulate(struct snake *snake, int bound, int reachable)
 
     int moves[N_DIRECTIONS];
     int n_moves = snake_generate_moves(snake, moves);
-    int min = N_CELLS;
+    int min = INT_MAX;
     for (int i = 0; i < n_moves; ++i) {
         ++search_info.nodes;
         struct snake *copy = snake_copy(snake);
@@ -82,11 +83,13 @@ int simulate(struct snake *snake, int bound, int reachable)
  */
 void search_pathfinder(struct snake *snake)
 {
+    int bound, min, cost;
+    bound = MANHATTAN(snake->body[0], snake->apple);
+
     int moves[N_DIRECTIONS];
     int n_moves = snake_generate_moves(snake, moves);
-    int bound = MANHATTAN(snake->body[0], snake->apple);
-    int cost;
     for (;;) {
+        min = INT_MAX;
         for (int i = 0; i < n_moves; ++i) {
             ++search_info.nodes;
             struct snake *copy = snake_copy(snake);
@@ -97,9 +100,12 @@ void search_pathfinder(struct snake *snake)
                 return;
             }
 
+            if (cost < min)
+                min = cost;
+
             snake_destroy(copy);
         }
 
-        bound = cost;
+        bound = min;
     }
 }
