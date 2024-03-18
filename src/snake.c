@@ -109,13 +109,13 @@ int snake_generate_moves(struct snake *self, int moves[N_DIRECTIONS])
  * Moves the snake one step in the direction it is facing and return if the
  * move resulted in the snake eating the apple.
  */
-int snake_move(struct snake *self, int hungry)
+int snake_move(struct snake *self)
 {
     if (self->direction < N_DIRECTIONS) {
         struct vec2 step;
         step.x = self->body[0].x + offsets[self->direction].x;
         step.y = self->body[0].y + offsets[self->direction].y;
-        if (VEC2_MATCH(step, self->apple) && hungry)
+        if (VEC2_MATCH(step, self->apple))
             grow(self);
 
         for (int i = self->length - 1; i > 0; --i)
@@ -124,7 +124,7 @@ int snake_move(struct snake *self, int hungry)
         self->body[0].x += offsets[self->direction].x;
         self->body[0].y += offsets[self->direction].y;
 
-        if (VEC2_MATCH(step, self->apple) && hungry) {
+        if (VEC2_MATCH(step, self->apple)) {
             random_apple(self);
             return 1;
         }

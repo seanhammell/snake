@@ -64,7 +64,7 @@ int simulate(struct snake *snake, int bound, int reachable)
         ++search_info.nodes;
         struct snake *copy = snake_copy(snake);
         copy->direction = moves[i];
-        if ((snake_move(copy, 1) && safe_path(copy)) || (cost = simulate(copy, bound, reachable + 1)) == FOUND) {
+        if ((snake_move(copy) && safe_path(copy)) || (cost = simulate(copy, bound, reachable + 1)) == FOUND) {
             snake_destroy(copy);
             return FOUND;
         }
@@ -92,7 +92,7 @@ void search_pathfinder(struct snake *snake)
             ++search_info.nodes;
             struct snake *copy = snake_copy(snake);
             copy->direction = moves[i];
-            if ((snake_move(copy, 1) && safe_path(copy)) || (cost = simulate(copy, bound, 1)) == FOUND) {
+            if ((snake_move(copy) && safe_path(copy)) || (cost = simulate(copy, bound, 1)) == FOUND) {
                 snake->direction = moves[i];
                 snake_destroy(copy);
                 return;
