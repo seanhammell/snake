@@ -21,7 +21,6 @@ int safe_path(struct snake *snake)
     queue_enqueue(queue, &args);
 
     OCCUPIED(snake);
-
     struct node *current;
     while (queue->head < queue->tail) {
         ++search_info.nodes;

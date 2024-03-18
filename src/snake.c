@@ -88,16 +88,20 @@ int snake_generate_moves(struct snake *self, int moves[N_DIRECTIONS])
         step.y = self->body[0].y + offsets[d].y;
         if (IN_BOUNDS(step.x, step.y) && !occupied[step.x][step.y]) {
             int value = MANHATTAN(step, self->apple);
+
             int i = 0;
             for (; i < n_moves; ++i) {
-                if (value < step_values[i] || d == self->direction)
+                if (value < step_values[i])
                     break;
             }
 
-            for (int j = n_moves; j > i; --j)
+            for (int j = n_moves; j > i; --j) {
                 moves[j] = moves[j - 1];
+                step_values[j] = step_values[j - 1];
+            }
 
             moves[i] = d;
+            step_values[i] = value;
             ++n_moves;
         }
     }
