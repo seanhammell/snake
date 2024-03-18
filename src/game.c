@@ -52,7 +52,7 @@ static int update(uint64_t dt, struct snake *snake)
         ++search_info.steps;
         elapsed -= interval;
         search_pathfinder(snake);
-        snake_move(snake);
+        snake_move(snake, 1);
 
         if (snake_biting_tail(snake) || !IN_BOUNDS(snake->body[0].x, snake->body[0].y) || FULL_SNAKE(snake)) {
             elapsed = 0;
