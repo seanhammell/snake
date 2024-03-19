@@ -4,10 +4,14 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#include "SDL2/SDL.h"
+
 #include "src/constants.h"
 #include "src/queue.h"
 
 #define FOUND   0
+
+static uint64_t time_limit = 0;
 
 /**
  * Determines if a path is safe by checking if the snake can see its tail. If
@@ -89,6 +93,9 @@ int fill_unoccupied(struct snake *snake)
  */
 int iterative_deepening_astar(struct snake *snake, int bound, int reachable)
 {
+    if (SDL_GetTicks64() > time_limit)
+        return INT_MAX;
+
     int cost = reachable + MANHATTAN(snake->body[0], snake->apple);
     if (cost > bound)
         return cost;
@@ -98,6 +105,9 @@ int iterative_deepening_astar(struct snake *snake, int bound, int reachable)
     int min = INT_MAX;
     for (int i = 0; i < n_moves; ++i) {
         ++search_info.nodes;
+        if (SDL_GetTicks64() > time_limit)
+            break;
+
         struct snake *copy = snake_copy(snake);
         copy->direction = moves[i];
         if ((snake_move(copy) && fill_unoccupied(copy)) || (cost = iterative_deepening_astar(copy, bound, reachable + 1)) == FOUND) {
@@ -121,15 +131,20 @@ int iterative_deepening_astar(struct snake *snake, int bound, int reachable)
  */
 void search_pathfinder(struct snake *snake)
 {
+    time_limit = SDL_GetTicks64() + INTERVAL - 2;
+
     int bound, min, cost;
     bound = MANHATTAN(snake->body[0], snake->apple);
 
     int moves[N_DIRECTIONS];
     int n_moves = snake_generate_moves(snake, moves);
-    while (bound < (N_CELLS - snake->length)) {
+    while (SDL_GetTicks64() < time_limit) {
         min = INT_MAX;
         for (int i = 0; i < n_moves; ++i) {
             ++search_info.nodes;
+            if (SDL_GetTicks64() > time_limit)
+                break;
+
             struct snake *copy = snake_copy(snake);
             copy->direction = moves[i];
             if ((snake_move(copy) && fill_unoccupied(copy)) || (cost = iterative_deepening_astar(copy, bound, 1)) == FOUND) {

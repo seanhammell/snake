@@ -1,9 +1,11 @@
 #ifndef SNAKE_CONSTANTS_H
 #define SNAKE_CONSTANTS_H
 
+#include <stdint.h>
 #include <stdlib.h>
 
-#define GRID_SIZE   6
+#define INTERVAL    40
+#define GRID_SIZE   8
 #define N_CELLS     (GRID_SIZE * GRID_SIZE)
 
 #define TILE_SIZE   16

@@ -32,7 +32,7 @@ int main(void)
             ++search_info.completed;
 
         fprintf(stderr,
-                "\r%3d Trial(s), Completed: %d/%d, Average Length:%6.2f, Average Steps:%5d, Average Nodes: %8d",
+                "\r%3d Trial(s), Completed: %d/%d, Average Length:%7.2f, Average Steps:%5d, Average Nodes: %8d",
                 i + 1,
                 search_info.completed,
                 search_info.total,
