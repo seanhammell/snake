@@ -11,7 +11,7 @@
 /**
  * Increases the snake's length by one.
  */
-void grow(struct snake *self)
+static void grow(struct snake *self)
 {
     if (self->length + 1 == N_CELLS)
         return;
@@ -24,7 +24,7 @@ void grow(struct snake *self)
 /**
  * Generates an apple in a random unoccupied position.
  */
-void random_apple(struct snake *self)
+static void random_apple(struct snake *self)
 {
     int occupied[GRID_SIZE][GRID_SIZE] = {0};
     for (int i = 0; i < self->length; ++i)

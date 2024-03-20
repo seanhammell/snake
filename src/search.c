@@ -18,7 +18,7 @@ static uint64_t time_limit = 0;
  * fill is set, the check continues until the queue is empty, attempting to
  * fill the grid.
  */
-int path_safe(struct snake *snake, int fill)
+static int path_safe(struct snake *snake, int fill)
 {
     if (snake->length < 4)
         return 1;
@@ -67,7 +67,7 @@ int path_safe(struct snake *snake, int fill)
  * Returns if any move from the current position can see all unoccupied cells
  * on the grid.
  */
-int fill_unoccupied(struct snake *snake)
+static int can_fill_unoccupied(struct snake *snake)
 {
     int moves[N_DIRECTIONS];
     int n_moves = snake_generate_moves(snake, moves);
@@ -91,7 +91,7 @@ int fill_unoccupied(struct snake *snake)
  * eats the apple, or the cost closest to the goal if the cost exceeds the
  * bound limit.
  */
-int iterative_deepening_astar(struct snake *snake, int bound, int reachable)
+static int iterative_deepening_astar(struct snake *snake, int bound, int reachable)
 {
     if (SDL_GetTicks64() > time_limit)
         return INT_MAX;
@@ -110,7 +110,7 @@ int iterative_deepening_astar(struct snake *snake, int bound, int reachable)
 
         struct snake *copy = snake_copy(snake);
         copy->direction = moves[i];
-        if ((snake_move(copy) && fill_unoccupied(copy)) || (cost = iterative_deepening_astar(copy, bound, reachable + 1)) == FOUND) {
+        if ((snake_move(copy) && can_fill_unoccupied(copy)) || (cost = iterative_deepening_astar(copy, bound, reachable + 1)) == FOUND) {
             snake_destroy(copy);
             return FOUND;
         }
@@ -147,7 +147,7 @@ void search_pathfinder(struct snake *snake)
 
             struct snake *copy = snake_copy(snake);
             copy->direction = moves[i];
-            if ((snake_move(copy) && fill_unoccupied(copy)) || (cost = iterative_deepening_astar(copy, bound, 1)) == FOUND) {
+            if ((snake_move(copy) && can_fill_unoccupied(copy)) || (cost = iterative_deepening_astar(copy, bound, 1)) == FOUND) {
                 snake->direction = moves[i];
                 snake_destroy(copy);
                 return;
