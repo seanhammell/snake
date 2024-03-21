@@ -4,6 +4,7 @@
 #include <stdlib.h>
 
 #include "src/constants.h"
+#include "src/hamiltonian.h"
 #include "src/search.h"
 
 #define EATING_APPLE(self, apple)   (self->body[0].x == apple->x && self->body[0].y == apple->y)
@@ -82,17 +83,25 @@ void snake_destroy(struct snake *self)
 int snake_generate_moves(struct snake *self, int moves[N_DIRECTIONS])
 {
     OCCUPIED(self);
+
     int n_moves = 0;
-    int step_values[N_DIRECTIONS];
+    int head_index = hamiltonian_index(&self->body[0]);
+
     struct vec2 step;
+    int step_index;
+    int step_values[N_DIRECTIONS];
     for (int d = 0; d < N_DIRECTIONS; ++d) {
         step.x = self->body[0].x + offsets[d].x;
         step.y = self->body[0].y + offsets[d].y;
         if (IN_BOUNDS(step.x, step.y) && !occupied[step.x][step.y]) {
-            int value = MANHATTAN(step, self->body[self->length - 1]);
+            step_index = hamiltonian_index(&step);
+            if (step_index < head_index)
+                step_index += N_CELLS;
+
+            int value = step_index - head_index;
             int i = 0;
             for (; i < n_moves; ++i) {
-                if (value > step_values[i] || (value == step_values[i] && d == self->direction))
+                if (value < step_values[i])
                     break;
             }
 

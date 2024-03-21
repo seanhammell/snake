@@ -6,6 +6,7 @@
 
 #include "src/constants.h"
 #include "src/graphics.h"
+#include "src/hamiltonian.h"
 #include "src/search.h"
 #include "src/snake.h"
 
@@ -93,6 +94,7 @@ int game_loop(struct graphics *graphics)
 {
     static uint64_t timer = 0;
 
+    hamiltonian_generate();
     struct snake *snake = snake_create();
 
     SDL_Event e;

@@ -8,6 +8,9 @@
 #define GRID_SIZE   8
 #define N_CELLS     (GRID_SIZE * GRID_SIZE)
 
+#define GRAPH_SIZE  (GRID_SIZE / 2)
+#define N_VERTICES  (GRAPH_SIZE * GRAPH_SIZE)
+
 #define TILE_SIZE   16
 #define SCREEN_SIZE (GRID_SIZE * TILE_SIZE)
 
