@@ -10,6 +10,7 @@ struct snake {
     int length;
     int direction;
     struct vec2 apple;
+    int steps_since_apple;
 };
 
 struct snake *snake_create(void);

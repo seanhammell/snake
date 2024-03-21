@@ -47,6 +47,7 @@ struct snake *snake_create(void)
     self->length = 1;
     self->direction = N_DIRECTIONS;
     random_apple(self);
+    self->steps_since_apple = 0;
     return self;
 }
 
@@ -62,6 +63,7 @@ struct snake *snake_copy(struct snake *self)
     copy->direction = self->direction;
     copy->apple.x = self->apple.x;
     copy->apple.y = self->apple.y;
+    copy->steps_since_apple = self->steps_since_apple;
     return copy;
 }
 
@@ -128,9 +130,12 @@ int snake_move(struct snake *self)
         self->body[0].y += offsets[self->direction].y;
 
         if (VEC2_MATCH(step, self->apple)) {
+            self->steps_since_apple = 0;
             random_apple(self);
             return 1;
         }
+
+        ++self->steps_since_apple;
     }
 
     return 0;

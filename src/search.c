@@ -133,11 +133,14 @@ void search_pathfinder(struct snake *snake)
 {
     time_limit = SDL_GetTicks64() + INTERVAL - 2;
 
-    int bound, min, cost;
-    bound = MANHATTAN(snake->body[0], snake->apple);
-
     int moves[N_DIRECTIONS];
     int n_moves = snake_generate_moves(snake, moves);
+
+    /* Search for the shortest path to the apple where the head of the snake
+    can make a move that has access to all unoccupied cells on the grid after
+    eating the apple. */
+    int bound, min, cost;
+    bound = MANHATTAN(snake->body[0], snake->apple);
     while (SDL_GetTicks64() < time_limit) {
         min = INT_MAX;
         for (int i = 0; i < n_moves; ++i) {
@@ -162,6 +165,29 @@ void search_pathfinder(struct snake *snake)
         bound = min;
     }
 
+    /* If the snake has made N_CELLS moves since the last time it ate an apple,
+    and it didn't return from the iterative deepening A* with a path to the
+    apple, it is probably in a loop. Pick a random safe move to try and break
+    the loop. */
+    if (snake->steps_since_apple > N_CELLS) {
+        for (;;) {
+            struct snake *copy = snake_copy(snake);
+            int random = rand() % n_moves;
+            copy->direction = moves[random];
+            snake_move(copy);
+            if (path_safe(copy, 0)) {
+                snake->direction = moves[random];
+                snake_destroy(copy);
+                return;
+            }
+
+            snake_destroy(copy);
+        }
+    }
+
+    /* If the snake didn't find a path with iterative deepening A* and isn't in
+    a loop, pick the move that takes it farthest from its tail without losing
+    sight of it. */
     for (int i = 0; i < n_moves; ++i) {
         struct snake *copy = snake_copy(snake);
         copy->direction = moves[i];
