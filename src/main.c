@@ -27,21 +27,25 @@ int main(void)
 
     fprintf(stderr, "\n");
     for (int i = 0; i < N_TRIALS; ++i) {
+        fprintf(stderr, "\033[2J\033[H");
+
+        fprintf(stderr, "Trial: %d\n", i + 1);
+        fprintf(stderr, "Completed: %d/%d\n", search_info.completed, search_info.total);
+        fprintf(stderr, "Average Length: %.2f\n", search_info.length / (float) (search_info.total ? search_info.total : 1));
+        fprintf(stderr, "Average Steps: %d\n", search_info.steps / search_info.completed);
+        fprintf(stderr, "Average Nodes: %d\n", search_info.nodes / search_info.completed);
+
         ++search_info.total;
         if (game_loop(graphics))
             ++search_info.completed;
-
-        fprintf(stderr,
-                "\r%3d Trial(s), Completed: %d/%d, Average Length:%7.2f, Average Steps:%5d, Average Nodes: %8d",
-                i + 1,
-                search_info.completed,
-                search_info.total,
-                search_info.length / (float) search_info.total,
-                search_info.steps / search_info.completed,
-                search_info.nodes / search_info.completed);
     }
 
-    fprintf(stderr, "\n\n");
+    fprintf(stderr, "\nResults\n");
+    fprintf(stderr, "%d Trial(s)\n", search_info.total);
+    fprintf(stderr, "Completed: %d/%d\n", search_info.completed, search_info.total);
+    fprintf(stderr, "Average Length: %.2f\n", search_info.length / (float) search_info.total);
+    fprintf(stderr, "Average Steps: %d\n", search_info.steps / search_info.completed);
+    fprintf(stderr, "Average Nodes: %d\n\n", search_info.nodes / search_info.completed);
 
     SDL_Event e;
     for (;;) {

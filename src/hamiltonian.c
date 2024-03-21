@@ -236,14 +236,13 @@ void hamiltonian_generate(void)
         step.y += offsets[direction].y;
     }
 
+    fprintf(stderr, "Hamiltonian Cycle:\n\n");
     for (int y = 0; y < GRID_SIZE; ++y) {
         for (int x = 0; x < GRID_SIZE; ++x)
             fprintf(stderr, "%4d ", hamiltonian_cycle[x][y].index);
 
         fprintf(stderr, "\n");
     }
-
-    fprintf(stderr, "\n");
 }
 
 /**
