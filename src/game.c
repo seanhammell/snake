@@ -109,7 +109,7 @@ int game_loop(struct graphics *graphics)
         }
 
         uint64_t now = SDL_GetTicks64();
-        int status = update(now - timer, snake);
+        int status = timer ? update(now - timer, snake) : -1;
         timer = now;
 
         SDL_SetRenderDrawColor(graphics->renderer, 0x11, 0x11, 0x11, 0xFF);
