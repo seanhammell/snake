@@ -126,6 +126,7 @@ int game_loop(struct graphics *graphics)
             }
 
             search_info.length += snake->length + status;
+            snake_destroy(snake);
             return status;
         }
     }
