@@ -77,8 +77,8 @@ void snake_destroy(struct snake *self)
 }
 
 /**
- * Generates the snake's possible moves in descending order of Manhattan
- * distance to its tail, preferring straight lines.
+ * Generates the snake's possible moves in ascending order of their distance
+ * from the current position on the hamiltonian cycle.
  */
 int snake_generate_moves(struct snake *self, int moves[N_DIRECTIONS])
 {
@@ -123,13 +123,13 @@ int snake_generate_moves(struct snake *self, int moves[N_DIRECTIONS])
  * Moves the snake one step in the direction it is facing and return if the
  * move resulted in the snake eating the apple.
  */
-int snake_move(struct snake *self)
+int snake_move(struct snake *self, int force_growth)
 {
     if (self->direction < N_DIRECTIONS) {
         struct vec2 step;
         step.x = self->body[0].x + offsets[self->direction].x;
         step.y = self->body[0].y + offsets[self->direction].y;
-        if (VEC2_MATCH(step, self->apple))
+        if (VEC2_MATCH(step, self->apple) || force_growth)
             grow(self);
 
         for (int i = self->length - 1; i > 0; --i)

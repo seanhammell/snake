@@ -10,6 +10,8 @@
 #include "src/queue.h"
 
 #define FOUND   0
+#define NO_FILL 0
+#define FILL    1
 
 static uint64_t time_limit = 0;
 
@@ -74,8 +76,8 @@ static int can_fill_unoccupied(struct snake *snake)
     for (int i = 0; i < n_moves; ++i) {
         struct snake *copy = snake_copy(snake);
         copy->direction = moves[i];
-        snake_move(copy);
-        if (path_safe(copy, 1)) {
+        snake_move(copy, FORCE_GROWTH);
+        if (path_safe(copy, FILL)) {
             snake_destroy(copy);
             return 1;
         }
@@ -110,7 +112,7 @@ static int iterative_deepening_astar(struct snake *snake, int bound, int reachab
 
         struct snake *copy = snake_copy(snake);
         copy->direction = moves[i];
-        if ((snake_move(copy) && can_fill_unoccupied(copy)) || (cost = iterative_deepening_astar(copy, bound, reachable + 1)) == FOUND) {
+        if ((snake_move(copy, STANDARD_GROWTH) && can_fill_unoccupied(copy)) || (cost = iterative_deepening_astar(copy, bound, reachable + 1)) == FOUND) {
             snake_destroy(copy);
             return FOUND;
         }
@@ -150,7 +152,7 @@ void search_pathfinder(struct snake *snake)
 
             struct snake *copy = snake_copy(snake);
             copy->direction = moves[i];
-            if ((snake_move(copy) && can_fill_unoccupied(copy)) || (cost = iterative_deepening_astar(copy, bound, 1)) == FOUND) {
+            if ((snake_move(copy, STANDARD_GROWTH) && can_fill_unoccupied(copy)) || (cost = iterative_deepening_astar(copy, bound, 1)) == FOUND) {
                 snake->direction = moves[i];
                 snake_destroy(copy);
                 return;
@@ -174,8 +176,8 @@ void search_pathfinder(struct snake *snake)
             struct snake *copy = snake_copy(snake);
             int random = rand() % n_moves;
             copy->direction = moves[random];
-            snake_move(copy);
-            if (path_safe(copy, 0)) {
+            snake_move(copy, STANDARD_GROWTH);
+            if (path_safe(copy, NO_FILL)) {
                 snake->direction = moves[random];
                 snake_destroy(copy);
                 return;
@@ -191,8 +193,8 @@ void search_pathfinder(struct snake *snake)
     for (int i = 0; i < n_moves; ++i) {
         struct snake *copy = snake_copy(snake);
         copy->direction = moves[i];
-        snake_move(copy);
-        if (path_safe(copy, 0)) {
+        snake_move(copy, STANDARD_GROWTH);
+        if (path_safe(copy, NO_FILL)) {
             snake->direction = moves[i];
             snake_destroy(copy);
             return;
